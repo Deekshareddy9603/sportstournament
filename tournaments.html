@@ -1,0 +1,4958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stackly | Elite Sports Tournament Engine</title>
+    <!-- Google Fonts: Space Grotesk & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+    /* --- CSS Reset & Refined Color Variables --- */
+    :root {
+        --bg-dark: #050814;
+        --card-bg: rgba(13, 19, 38, 0.85);
+        
+        /* Vibrant High-Contrast Sports Colors */
+        --neon-cyan: #00F0FF;
+        --neon-cyan-glow: rgba(0, 240, 255, 0.5);
+        --electric-purple: #9D4EDD;
+        --electric-purple-glow: rgba(157, 78, 221, 0.5);
+        --accent-orange: #FF6B00;
+        --accent-orange-glow: rgba(255, 107, 0, 0.5);
+        
+        --text-light: #FFFFFF;
+        --text-muted: #A0AEC0;
+        --border-glass: rgba(255, 255, 255, 0.15);
+        
+        /* Modernized Typography */
+        --font-heading: 'Space Grotesk', sans-serif;
+        --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: var(--font-body);
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        overflow-x: hidden;
+        width: 100%;
+    }
+
+    /* --- Scroll Animations --- */
+    .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* --- Fixed Glassmorphism Header --- */
+    .site-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(4, 7, 17, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-glass);
+        z-index: 1000;
+    }
+
+    .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* Logo Fix: Added Inline Graphic & Styled Text */
+    /* Clean Logo Link (No hover background or fill) */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-light);
+    letter-spacing: -0.5px;
+    background: transparent !important; /* Forces background to remain transparent */
+    padding: 0;                          /* Prevents padding fill box */
+    border: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Explicitly disable any hover background */
+.logo-link:hover,
+.logo-link:focus,
+.logo-link:active {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+/* Optional subtle opacity tweak on hover instead of background fill */
+.logo-link:hover {
+    opacity: 0.9;
+}
+
+/* Logo Image Properties */
+.logo-img {
+    height: 45px;
+    width: auto;
+    object-fit: contain;
+    background: transparent;
+    display: block;
+}
+
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+    }
+
+    .nav-item {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: color 0.3s ease;
+        position: relative;
+    }
+
+    .nav-item:hover, .nav-item.active {
+        color: var(--neon-cyan);
+    }
+
+    .nav-item::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--neon-cyan);
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px var(--neon-cyan-glow);
+    }
+
+    .nav-item:hover::after, .nav-item.active::after {
+        width: 100%;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .btn-login {
+        background: rgba(0, 240, 255, 0.1);
+        border: 1px solid var(--neon-cyan);
+        color: var(--neon-cyan);
+        padding: 8px 22px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-login:hover {
+        background: var(--neon-cyan);
+        color: var(--bg-dark);
+        box-shadow: 0 0 20px var(--neon-cyan-glow);
+    }
+
+    .mobile-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    /* --- Hero Section --- */
+    .hero-section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 130px 24px 60px 24px;
+        background: 
+            radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.12) 0%, transparent 65%),
+            linear-gradient(180deg, rgba(5, 8, 20, 0.9) 0%, rgba(5, 8, 20, 0.4) 50%, rgba(5, 8, 20, 0.95) 100%),
+            url('./d.jpg') center/cover no-repeat;
+        overflow: hidden;
+    }
+
+    .hero-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 280px 1fr 280px;
+        gap: 32px;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* --- CENTER COLUMN --- */
+    .hero-center {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 680px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 240, 255, 0.1);
+        border: 1px solid var(--neon-cyan);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--neon-cyan);
+        margin-bottom: 20px;
+        backdrop-filter: blur(12px);
+    }
+
+    .hero-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2.4rem, 5vw, 4.4rem);
+        line-height: 1.05;
+        font-weight: 800;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        word-wrap: break-word;
+    }
+
+    .highlight-cyan {
+        color: var(--neon-cyan);
+        text-shadow: 0 0 20px var(--neon-cyan-glow);
+    }
+
+    .highlight-purple {
+        color: #C77DFF;
+        text-shadow: 0 0 20px var(--electric-purple-glow);
+    }
+
+    .hero-description {
+        font-size: clamp(0.95rem, 2vw, 1.1rem);
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 32px;
+        max-width: 580px;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--neon-cyan), #00A8FF);
+        color: #040814;
+        padding: 14px 30px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 20px var(--neon-cyan-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 35px var(--neon-cyan-glow);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: var(--text-light);
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(12px);
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--electric-purple);
+        box-shadow: 0 0 20px var(--electric-purple-glow);
+        transform: translateY(-3px);
+    }
+
+    /* --- SPORTS CARDS & PURE COLOR SCHEMES --- */
+    .sports-column {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .sport-circle-card {
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border-glass);
+        padding: 12px 18px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s ease;
+    }
+
+    .sport-circle-card:hover {
+        transform: scale(1.03);
+    }
+
+    .sport-icon-sphere {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+
+    /* Color Variant 1: Cyan */
+    .cyan-sphere .sport-icon-sphere {
+        background: radial-gradient(circle at 30% 30%, rgba(0, 240, 255, 0.4), rgba(0, 240, 255, 0.1));
+        border: 1px solid var(--neon-cyan);
+        color: var(--neon-cyan);
+        box-shadow: 0 0 12px var(--neon-cyan-glow);
+    }
+    .cyan-sphere:hover {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 20px var(--neon-cyan-glow);
+    }
+
+    /* Color Variant 2: Purple */
+    .purple-sphere .sport-icon-sphere {
+        background: radial-gradient(circle at 30% 30%, rgba(157, 78, 221, 0.4), rgba(157, 78, 221, 0.1));
+        border: 1px solid var(--electric-purple);
+        color: #C77DFF;
+        box-shadow: 0 0 12px var(--electric-purple-glow);
+    }
+    .purple-sphere:hover {
+        border-color: var(--electric-purple);
+        box-shadow: 0 0 20px var(--electric-purple-glow);
+    }
+
+    /* Color Variant 3: Orange */
+    .orange-sphere .sport-icon-sphere {
+        background: radial-gradient(circle at 30% 30%, rgba(255, 107, 0, 0.4), rgba(255, 107, 0, 0.1));
+        border: 1px solid var(--accent-orange);
+        color: var(--accent-orange);
+        box-shadow: 0 0 12px var(--accent-orange-glow);
+    }
+    .orange-sphere:hover {
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 20px var(--accent-orange-glow);
+    }
+
+    .sport-info h4 {
+        font-family: var(--font-heading);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-light);
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+    }
+
+    .sport-info p {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    /* Floating Keyframe Animations */
+    @media (min-width: 1025px) {
+        .float-slow { animation: floatAnim 6s ease-in-out infinite; }
+        .float-medium { animation: floatAnim 4.5s ease-in-out infinite 1s; }
+        .float-fast { animation: floatAnim 5.5s ease-in-out infinite 2s; }
+    }
+
+    @keyframes floatAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1199px) {
+        .hero-container {
+            grid-template-columns: 240px 1fr 240px;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .hero-section {
+            padding-top: 110px;
+            padding-bottom: 50px;
+            min-height: auto;
+        }
+
+        .hero-container {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .hero-center { order: 1; }
+        .left-column { order: 2; }
+        .right-column { order: 3; }
+
+        .sports-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .sport-circle-card {
+            border-radius: 16px;
+            padding: 10px 14px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .site-header { padding: 0; }
+        .nav-container { padding: 14px 20px; }
+
+        .nav-menu {
+            position: fixed;
+            top: 65px;
+            left: -100%;
+            width: 100%;
+            height: calc(100vh - 65px);
+            background: rgba(5, 8, 20, 0.98);
+            backdrop-filter: blur(20px);
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 50px;
+            gap: 24px;
+            transition: left 0.3s ease-in-out;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .nav-menu.active { left: 0; }
+        .mobile-toggle { display: block; }
+
+        .hero-actions {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-primary, .btn-secondary { width: 100%; }
+
+        .sports-column {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .sport-circle-card {
+            padding: 8px 10px;
+            gap: 10px;
+            border-radius: 14px;
+        }
+
+        .sport-icon-sphere {
+            width: 36px;
+            height: 36px;
+            font-size: 0.95rem;
+        }
+
+        .sport-info h4 { font-size: 0.85rem; }
+        .sport-info p { font-size: 0.68rem; }
+    }
+
+    @media (max-width: 420px) {
+        .sports-column { grid-template-columns: 1fr; }
+        .sport-circle-card { border-radius: 40px; }
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed Header -->
+    <header class="site-header">
+        <div class="nav-container">
+            <!-- Brand Logo Fixed -->
+           <!-- Brand Logo with Image -->
+<a href="./index.html" class="logo-link">
+    <img src="./logoo_26_11zon.webp" alt="Stackly Logo" class="logo-img">
+    <span></span>
+</a>
+
+            <!-- Navigation Links -->
+           
+            <!-- Navigation Links -->
+            <nav class="nav-menu" id="navMenu">
+                <a href="./index.html" class="nav-item ">Home</a>
+                <a href="./about.html" class="nav-item">About Us</a>
+                <a href="./tournaments.html" class="nav-item active">Tournaments</a>
+                <a href="./teams.html" class="nav-item">Teams</a>
+                <a href="./matches.html" class="nav-item">Matches</a>
+                <a href="./leaderboard.html" class="nav-item">Leaderboard</a>
+                <a href="./contact.html" class="nav-item">Contact</a>
+            </nav>
+
+            <!-- Action Toggle -->
+            <div class="nav-right">
+                <a href="./login.html" class="btn-login"><i class="fa-solid fa-user"></i> Login</a>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+<!-- Google Fonts & FontAwesome (Ensure these are loaded in your header) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* --- Stackly Hero Section Styles --- */
+.stackly-hero-section {
+    position: relative;
+    min-height: 70vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    
+    /* Full-Screen Immersive Stadium Background Image */
+    background-image: url('./im.avif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Deep Cyberpunk Dark Gradient Overlay */
+.stackly-hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(2, 6, 23, 0.92) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(2, 6, 23, 0.95) 100%);
+    z-index: 1;
+}
+
+/* Central Neon Ambient Glow */
+.hero-bg-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.hero-container {
+    max-width: 1050px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+/* Hero Badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    padding: 5px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #00F0FF;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Hero Heading */
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.hero-subtitle {
+    font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+    line-height: 1.6;
+    color: #CBD5E1;
+    max-width: 700px;
+    margin: 0;
+}
+
+/* Search Wrapper (Handles Form & Error alignment nicely) */
+.hero-search-wrapper {
+    width: 100%;
+    max-width: 850px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+/* Interactive Search & Filter Hub Form */
+.hero-search-hub {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.1);
+}
+
+/* Sport Filter Dropdown Container */
+.hero-filter-dropdown {
+    position: relative;
+    flex: 0 0 160px;
+    height: 42px;
+}
+
+.hero-filter-select {
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 7, 18, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0 32px 0 14px;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hero-filter-select:hover, .hero-filter-select:focus {
+    border-color: #00F0FF;
+}
+
+.hero-filter-dropdown::after {
+    content: '\f107';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00F0FF;
+    pointer-events: none;
+    font-size: 0.8rem;
+}
+
+/* Search Bar Input Container */
+.hero-search-bar {
+    position: relative;
+    flex: 1;
+    height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-search-input {
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 7, 18, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0 14px 0 36px;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.hero-search-input::placeholder {
+    color: #64748B;
+}
+
+.hero-search-input:hover, .hero-search-input:focus {
+    border-color: #00F0FF;
+}
+
+.hero-search-icon {
+    position: absolute;
+    left: 14px;
+    color: #00F0FF;
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+/* Search Button */
+.hero-search-btn {
+    height: 42px;
+    background: linear-gradient(135deg, #00F0FF 0%, #0072FF 100%);
+    color: #030712;
+    border: none;
+    border-radius: 8px;
+    padding: 0 22px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 240, 255, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.hero-search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 240, 255, 0.5);
+}
+
+/* Error warning text styling */
+.hero-form-error {
+    color: #ff4d4d;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: none;
+    text-align: left;
+    padding-left: 4px;
+}
+
+/* Quick Trending Sport Tags */
+.hero-trending-tags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.trending-label {
+    font-size: 0.75rem;
+    color: #64748B;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trending-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #CBD5E1;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.trending-tag:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: rgba(0, 240, 255, 0.3);
+    color: #00F0FF;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+    .stackly-hero-section {
+        padding: 60px 16px;
+    }
+    .hero-search-hub {
+        flex-direction: column;
+        padding: 10px;
+        gap: 8px;
+    }
+    .hero-filter-dropdown, .hero-search-bar, .hero-search-btn {
+        width: 100%;
+        flex: unset;
+        height: 44px;
+    }
+    .hero-search-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<!-- Stackly Hero Section -->
+<section class="stackly-hero-section">
+    <div class="hero-bg-glow"></div>
+    
+   <div class="hero-container">
+        
+        <br>
+        <br><span class="hero-badge">
+            <i class="fa-solid fa-trophy"></i> Ultimate Championship Arena
+        </span>
+        
+        <h1 class="hero-title">
+            FIND YOUR <span style="color: #00F0FF;">TOURNAMENT</span>
+        </h1>
+        
+        <p class="hero-subtitle">
+            Discover premier championships, register your team, and compete in professional sports leagues with real-time tracking and verified prize pools.
+        </p>
+
+        <!-- Search Wrapper -->
+        <div class="hero-search-wrapper">
+            <!-- Search & Filter Hub Form -->
+            <form id="heroSearchForm" class="hero-search-hub" onsubmit="handleHeroSearch(event)">
+                
+                <!-- Sport Filter Select -->
+                <div class="hero-filter-dropdown">
+                    <select id="sportSelect" class="hero-filter-select" required>
+                        <option value="" disabled selected>Select Sport</option>
+                        <option value="football">Football</option>
+                        <option value="cricket">Cricket</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="volleyball">Volleyball</option>
+                        <option value="esports">Esports</option>
+                    </select>
+                </div>
+
+                <!-- Search Input Bar -->
+                <div class="hero-search-bar">
+                    <i class="fa-solid fa-magnifying-glass hero-search-icon"></i>
+                    <input type="text" id="tournamentInput" class="hero-search-input" placeholder="Fill tournament details..." required>
+                </div>
+
+                <!-- Search Button -->
+                <button class="hero-search-btn" type="submit">
+                    <span>Search</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+            </form>
+            <div id="formErrorMsg" class="hero-form-error">⚠️ Please fill in the details and select a sport before searching!</div>
+        </div>
+
+        <!-- Quick Trending Tags -->
+        <div class="hero-trending-tags">
+            <span class="trending-label">Trending:</span>
+            <a href="./404.html" class="trending-tag">Global Cup 2026</a>
+            <a href="./404.html" class="trending-tag">Premier League</a>
+            <a href="./404.html" class="trending-tag">Weekend Smash</a>
+            <a href="./404.html" class="trending-tag">Pro Esports</a>
+        </div>
+
+    </div>
+</section>
+
+<!-- Validation & 404 Redirect Script -->
+<script>
+    function handleHeroSearch(event) {
+        event.preventDefault();
+        
+        const sportVal = document.getElementById('sportSelect').value;
+        const tournamentVal = document.getElementById('tournamentInput').value.trim();
+        const errorMsg = document.getElementById('formErrorMsg');
+
+        // Check if both fields are filled out/selected
+        if (!sportVal || sportVal === "" || tournamentVal === "") {
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        // Hide error message if validated
+        errorMsg.style.display = "none";
+
+        // Redirect to 404 page
+        window.location.href = "404.html";
+    }
+</script>
+<style>
+/* --- Featured Tournaments Section --- */
+.featured-tournaments-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.tournaments-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    padding: 5px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #00F0FF;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: 0.95rem;
+    color: #94A3B8;
+    max-width: 600px;
+    margin: 0;
+}
+
+/* Tournaments Grid (Asymmetric Layout) */
+.tournaments-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+/* Tournament Card Base Style */
+.tournament-card {
+    grid-column: span 6;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.tournament-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 240, 255, 0.15);
+}
+
+/* Asymmetric Span variation for visual variety */
+.tournament-card.featured-main {
+    grid-column: span 7;
+}
+
+.tournament-card.featured-side {
+    grid-column: span 5;
+}
+
+/* Card Poster Media Container */
+.card-media-wrapper {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+}
+
+.card-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.tournament-card:hover .card-poster {
+    transform: scale(1.05);
+}
+
+.card-media-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.2) 0%, rgba(3, 7, 18, 0.85) 100%);
+}
+
+/* Floating Badges inside Poster */
+.sport-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(3, 7, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: #00F0FF;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+}
+
+.trophy-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: #030712;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    z-index: 2;
+}
+
+/* Card Content Body */
+.card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+.card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Tournament Meta Grid (Location, Date, Prize Pool) */
+.card-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+}
+
+.meta-item i {
+    color: #00F0FF;
+    font-size: 0.95rem;
+}
+
+.meta-item span {
+    color: #E2E8F0;
+    font-weight: 600;
+}
+
+/* Card Footer & Action Button */
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.prize-pool-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.prize-label {
+    font-size: 0.7rem;
+    color: #64748B;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.prize-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #10B981;
+}
+
+.view-tournament-btn {
+    background: linear-gradient(135deg, #00F0FF 0%, #0072FF 100%);
+    color: #030712;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
+}
+
+.view-tournament-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+    color: #030712;
+}
+
+/* Responsive Styles */
+@media (max-width: 968px) {
+    .tournament-card.featured-main,
+    .tournament-card.featured-side {
+        grid-column: span 12;
+    }
+}
+</style>
+
+<!-- Featured Tournaments Section HTML -->
+<section class="featured-tournaments-section">
+    <div class="tournaments-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-fire"></i> Handpicked Championships
+            </span>
+            <h2 class="section-title">Featured Tournaments</h2>
+            <p class="section-subtitle">Join elite teams, compete in high-stakes brackets, and claim your share of massive prize pools.</p>
+        </div>
+
+        <!-- Tournaments Grid (Asymmetric Layout) -->
+        <div class="tournaments-grid">
+            
+            <!-- Main Featured Card (Wider Span 7) -->
+            <div class="tournament-card featured-main">
+                <div class="card-media-wrapper">
+                    <!-- Tournament Poster Image -->
+                    <img src="./1 (24).webp" alt="Global Football Cup 2026 Poster" class="card-poster">
+                    <div class="card-media-overlay"></div>
+                    
+                    <!-- Sport Icon & Badge -->
+                    <span class="sport-badge">
+                        <i class="fa-solid fa-futbol"></i> Football
+                    </span>
+                    <!-- Trophy Badge -->
+                    <span class="trophy-badge">
+                        <i class="fa-solid fa-trophy"></i> Elite Tier
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <h3 class="card-title">Global Pro Football Championship 2026</h3>
+                    
+                    <div class="card-meta-grid">
+                        <div class="meta-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <div>Location: <span>Wembley Arena, London</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-regular fa-calendar-days"></i>
+                            <div>Date: <span>July 14 - 28, 2026</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="prize-pool-box">
+                            <span class="prize-label">Verified Prize Pool</span>
+                            <span class="prize-value">$50,000 USD</span>
+                        </div>
+                        <a href="404.html" class="view-tournament-btn">
+                            <span>View Details</span> <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Featured Card (Narrower Span 5) -->
+            <div class="tournament-card featured-side">
+                <div class="card-media-wrapper">
+                    <!-- Tournament Poster Image -->
+                    <img src="./1 (54).webp" alt="Cyber Esports League Poster" class="card-poster">
+                    <div class="card-media-overlay"></div>
+                    
+                    <!-- Sport Icon & Badge -->
+                    <span class="sport-badge">
+                        <i class="fa-solid fa-gamepad"></i> Esports
+                    </span>
+                    <!-- Trophy Badge -->
+                    <span class="trophy-badge">
+                        <i class="fa-solid fa-trophy"></i> Pro League
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <h3 class="card-title">Apex Legends Cyber Series</h3>
+                    
+                    <div class="card-meta-grid">
+                        <div class="meta-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <div>Location: <span>Online Global</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-regular fa-calendar-days"></i>
+                            <div>Date: <span>Aug 04, 2026</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="prize-pool-box">
+                            <span class="prize-label">Verified Prize Pool</span>
+                            <span class="prize-value">$25,000 USD</span>
+                        </div>
+                        <a href="404.html" class="view-tournament-btn">
+                            <span>View Details</span> <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Upcoming Tournaments Section --- */
+.upcoming-tournaments-section {
+    position: relative;
+    padding: 90px 0 100px 0;
+    background: #020617;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.upcoming-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* Header with Scroll Nav Controls */
+.upcoming-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.upcoming-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.scroll-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.scroll-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 50%;
+    color: #00F0FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-btn:hover {
+    background: #00F0FF;
+    color: #030712;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+}
+
+/* Horizontal Scroll Container */
+.matches-scroll-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 240, 255, 0.3) rgba(15, 23, 42, 0.5);
+}
+
+.matches-scroll-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.matches-scroll-track::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 10px;
+}
+
+.matches-scroll-track::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.4);
+    border-radius: 10px;
+}
+
+/* Individual Match Card */
+.match-card {
+    flex: 0 0 360px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.match-card:hover {
+    transform: translateY(-50px);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 240, 255, 0.15);
+}
+
+/* Card Header: Sport Icon & Registration Status */
+.card-top-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.match-sport-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: #00F0FF;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.reg-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.reg-status.open {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.reg-status.closing {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Teams Showcase Row */
+.match-teams-showcase {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(3, 7, 18, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.team-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    text-align: center;
+}
+
+.team-logo {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #ffffff;
+    font-size: 0.9rem;
+    overflow: hidden;
+}
+
+.team-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #E2E8F0;
+    margin: 0;
+}
+
+.vs-badge {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #64748B;
+    padding: 0 8px;
+}
+
+/* Match Meta (Date & Countdown Box) */
+.match-meta-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 16px;
+}
+
+.match-date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #94A3B8;
+}
+
+.match-date-row i {
+    color: #00F0FF;
+}
+
+.match-date-row span {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Countdown Timer Grid */
+.countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+
+.countdown-box {
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 6px 4px;
+}
+
+.countdown-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #00F0FF;
+    display: block;
+}
+
+.countdown-lbl {
+    font-size: 0.65rem;
+    color: #64748B;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+/* Action Button */
+.match-register-btn {
+    background: linear-gradient(135deg, #00F0FF 0%, #0072FF 100%);
+    color: #030712;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
+    display: block;
+}
+
+.match-register-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+    color: #030712;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .upcoming-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .scroll-controls {
+        align-self: flex-end;
+    }
+}
+</style>
+
+<!-- Upcoming Tournaments Section HTML -->
+<section class="upcoming-tournaments-section">
+    <div class="upcoming-container">
+        
+        <!-- Header Row with Scroll Buttons -->
+        <div class="upcoming-header-row">
+            <div class="upcoming-header-info">
+                <span class="section-badge">
+                    <i class="fa-solid fa-clock"></i> Next In Line
+                </span>
+                <h2 class="section-title">Upcoming Tournaments</h2>
+            </div>
+            
+            <div class="scroll-controls">
+                <button class="scroll-btn" onclick="scrollMatches(-1)" aria-label="Scroll Left">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button class="scroll-btn" onclick="scrollMatches(1)" aria-label="Scroll Right">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Horizontal Scrolling Track -->
+        <div class="matches-scroll-track" id="matchesTrack">
+            
+            <!-- Match Card 1 -->
+            <div class="match-card">
+                <div class="card-top-info">
+                    <span class="match-sport-tag">
+                        <i class="fa-solid fa-futbol"></i> Football Cup
+                    </span>
+                    <span class="reg-status open">Registration Open</span>
+                </div>
+
+                <!-- Team Logos Matchup -->
+                <div class="match-teams-showcase">
+                    <div class="team-block">
+                        <div class="team-logo">FCV</div>
+                        <span class="team-name">Vipers FC</span>
+                    </div>
+                    <span class="vs-badge">VS</span>
+                    <div class="team-block">
+                        <div class="team-logo">TSE</div>
+                        <span class="team-name">Strikers XI</span>
+                    </div>
+                </div>
+
+                <div class="match-meta-box">
+                    <div class="match-date-row">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>Oct 12, 2026 • 18:00 UTC</span>
+                    </div>
+                    
+                    <!-- Countdown Timers -->
+                    <div class="countdown-grid">
+                        <div class="countdown-box">
+                            <span class="countdown-num">16</span>
+                            <span class="countdown-lbl">Days</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">08</span>
+                            <span class="countdown-lbl">Hrs</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">45</span>
+                            <span class="countdown-lbl">Min</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">30</span>
+                            <span class="countdown-lbl">Sec</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="404.html" class="match-register-btn">Register Team Now</a>
+            </div>
+
+            <!-- Match Card 2 -->
+            <div class="match-card">
+                <div class="card-top-info">
+                    <span class="match-sport-tag">
+                        <i class="fa-solid fa-basketball"></i> Basketball
+                    </span>
+                    <span class="reg-status closing">Closing Soon</span>
+                </div>
+
+                <!-- Team Logos Matchup -->
+                <div class="match-teams-showcase">
+                    <div class="team-block">
+                        <div class="team-logo">BLZ</div>
+                        <span class="team-name">Blaze Titans</span>
+                    </div>
+                    <span class="vs-badge">VS</span>
+                    <div class="team-block">
+                        <div class="team-logo">SKT</div>
+                        <span class="team-name">Skyline Ballers</span>
+                    </div>
+                </div>
+
+                <div class="match-meta-box">
+                    <div class="match-date-row">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>Oct 19, 2026 • 20:30 UTC</span>
+                    </div>
+                    
+                    <!-- Countdown Timers -->
+                    <div class="countdown-grid">
+                        <div class="countdown-box">
+                            <span class="countdown-num">23</span>
+                            <span class="countdown-lbl">Days</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">12</span>
+                            <span class="countdown-lbl">Hrs</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">10</span>
+                            <span class="countdown-lbl">Min</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">05</span>
+                            <span class="countdown-lbl">Sec</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="404.html" class="match-register-btn">Register Team Now</a>
+            </div>
+
+            <!-- Match Card 3 -->
+            <div class="match-card">
+                <div class="card-top-info">
+                    <span class="match-sport-tag">
+                        <i class="fa-solid fa-gamepad"></i> Esports Arena
+                    </span>
+                    <span class="reg-status open">Registration Open</span>
+                </div>
+
+                <!-- Team Logos Matchup -->
+                <div class="match-teams-showcase">
+                    <div class="team-block">
+                        <div class="team-logo">NXT</div>
+                        <span class="team-name">Nexus Gaming</span>
+                    </div>
+                    <span class="vs-badge">VS</span>
+                    <div class="team-block">
+                        <div class="team-logo">PHX</div>
+                        <span class="team-name">Phoenix Clan</span>
+                    </div>
+                </div>
+
+                <div class="match-meta-box">
+                    <div class="match-date-row">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>Nov 02, 2026 • 15:00 UTC</span>
+                    </div>
+                    
+                    <!-- Countdown Timers -->
+                    <div class="countdown-grid">
+                        <div class="countdown-box">
+                            <span class="countdown-num">37</span>
+                            <span class="countdown-lbl">Days</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">04</span>
+                            <span class="countdown-lbl">Hrs</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">20</span>
+                            <span class="countdown-lbl">Min</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">15</span>
+                            <span class="countdown-lbl">Sec</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="404.html" class="match-register-btn">Register Team Now</a>
+            </div>
+
+            <!-- Match Card 4 -->
+            <div class="match-card">
+                <div class="card-top-info">
+                    <span class="match-sport-tag">
+                        <i class="fa-solid fa-table-tennis-paddle-ball"></i> Tennis Open
+                    </span>
+                    <span class="reg-status open">Registration Open</span>
+                </div>
+
+                <!-- Team Logos Matchup -->
+                <div class="match-teams-showcase">
+                    <div class="team-block">
+                        <div class="team-logo">ACE</div>
+                        <span class="team-name">Ace Dynasty</span>
+                    </div>
+                    <span class="vs-badge">VS</span>
+                    <div class="team-block">
+                        <div class="team-logo">SRV</div>
+                        <span class="team-name">Serve Masters</span>
+                    </div>
+                </div>
+
+                <div class="match-meta-box">
+                    <div class="match-date-row">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>Nov 15, 2026 • 14:00 UTC</span>
+                    </div>
+                    
+                    <!-- Countdown Timers -->
+                    <div class="countdown-grid">
+                        <div class="countdown-box">
+                            <span class="countdown-num">50</span>
+                            <span class="countdown-lbl">Days</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">18</span>
+                            <span class="countdown-lbl">Hrs</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">55</span>
+                            <span class="countdown-lbl">Min</span>
+                        </div>
+                        <div class="countdown-box">
+                            <span class="countdown-num">40</span>
+                            <span class="countdown-lbl">Sec</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="404.html" class="match-register-btn">Register Team Now</a>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- Scroll Track Navigation Script -->
+<script>
+    function scrollMatches(direction) {
+        const track = document.getElementById('matchesTrack');
+        const scrollAmount = 385; // Card width + gap
+        track.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+</script>
+<style>
+/* --- Live Tournaments Section --- */
+.live-tournaments-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.live-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* Header Live Status */
+.live-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 5px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #EF4444;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: #EF4444;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #EF4444;
+    animation: livePulse 1.5s infinite;
+}
+
+@keyframes livePulse {
+    0% { transform: scale(0.95); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.4; }
+    100% { transform: scale(0.95); opacity: 1; }
+}
+
+/* Live Cards Grid */
+.live-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+.live-card {
+    grid-column: span 4;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+.live-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 25px 50px rgba(239, 68, 68, 0.2);
+}
+
+/* Live Media Poster Frame */
+.live-media-box {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+}
+
+.live-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.live-card:hover .live-poster {
+    transform: scale(1.05);
+}
+
+.live-media-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.2) 0%, rgba(3, 7, 18, 0.9) 100%);
+}
+
+/* Floating Overlays on Image */
+.live-badge-overlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    z-index: 2;
+}
+
+.viewers-pill {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #CBD5E1;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+}
+
+.viewers-pill i {
+    color: #00F0FF;
+}
+
+/* Live Card Body */
+.live-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+.live-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Scoreboard Panel */
+.live-scoreboard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(3, 7, 18, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.team-score-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-score-block.right {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.team-mini-logo {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #ffffff;
+    font-size: 0.75rem;
+}
+
+.team-code {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #E2E8F0;
+}
+
+.score-display {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #00F0FF;
+    letter-spacing: 2px;
+}
+
+/* Card Footer & Watch Button */
+.live-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 14px;
+    margin-top: auto;
+}
+
+.match-round-info {
+    font-size: 0.75rem;
+    color: #64748B;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.watch-live-btn {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.watch-live-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+}
+
+/* Responsive Grid */
+@media (max-width: 1024px) {
+    .live-card {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 768px) {
+    .live-card {
+        grid-column: span 12;
+    }
+}
+</style>
+
+<!-- Live Tournaments Section HTML -->
+<section class="live-tournaments-section">
+    <div class="live-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="live-header-badge">
+                <span class="live-dot"></span> Streaming Now
+            </span>
+            <h2 class="section-title">Live Tournaments</h2>
+            <p class="section-subtitle">Catch the action in real-time, monitor live match scores, and stream high-stakes championship games.</p>
+        </div>
+
+        <!-- Live Grid with Multiple Image Cards -->
+        <div class="live-grid">
+            
+            <!-- Live Card 1 -->
+            <div class="live-card">
+                <div class="live-media-box">
+                    <img src="./1 (20).webp" alt="Football Live Match Poster" class="live-poster">
+                    <div class="live-media-overlay"></div>
+                    
+                    <span class="live-badge-overlay">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                    <span class="viewers-pill">
+                        <i class="fa-solid fa-eye"></i> 14.2K
+                    </span>
+                </div>
+                
+                <div class="live-body">
+                    <h3 class="live-title">Global Cup Semi-Finals: Vipers vs Strikers</h3>
+                    
+                    <div class="live-scoreboard">
+                        <div class="team-score-block">
+                            <div class="team-mini-logo">VIP</div>
+                            <span class="team-code">Vipers</span>
+                        </div>
+                        <div class="score-display">2 - 1</div>
+                        <div class="team-score-block right">
+                            <div class="team-mini-logo">STR</div>
+                            <span class="team-code">Strikers</span>
+                        </div>
+                    </div>
+
+                    <div class="live-footer">
+                        <span class="match-round-info">78' • 2nd Half</span>
+                        <a href="404.html" class="watch-live-btn">
+                            <span>Watch Live</span> <i class="fa-solid fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Card 2 -->
+            <div class="live-card">
+                <div class="live-media-box">
+                    <img src="./1 (19).webp" alt="Esports Arena Live Poster" class="live-poster">
+                    <div class="live-media-overlay"></div>
+                    
+                    <span class="live-badge-overlay">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                    <span class="viewers-pill">
+                        <i class="fa-solid fa-eye"></i> 28.5K
+                    </span>
+                </div>
+                
+                <div class="live-body">
+                    <h3 class="live-title">Cyber Masters Grand Finals: Nexus vs Phoenix</h3>
+                    
+                    <div class="live-scoreboard">
+                        <div class="team-score-block">
+                            <div class="team-mini-logo">NXT</div>
+                            <span class="team-code">Nexus</span>
+                        </div>
+                        <div class="score-display">2 - 0</div>
+                        <div class="team-score-block right">
+                            <div class="team-mini-logo">PHX</div>
+                            <span class="team-code">Phoenix</span>
+                        </div>
+                    </div>
+
+                    <div class="live-footer">
+                        <span class="match-round-info">Map 3 • Match Point</span>
+                        <a href="404.html" class="watch-live-btn">
+                            <span>Watch Live</span> <i class="fa-solid fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Card 3 -->
+            <div class="live-card">
+                <div class="live-media-box">
+                    <img src="./1 (18).webp" alt="Basketball Championship Live Poster" class="live-poster">
+                    <div class="live-media-overlay"></div>
+                    
+                    <span class="live-badge-overlay">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                    <span class="viewers-pill">
+                        <i class="fa-solid fa-eye"></i> 9.8K
+                    </span>
+                </div>
+                
+                <div class="live-body">
+                    <h3 class="live-title">Pro Basketball League: Blaze vs Skyline</h3>
+                    
+                    <div class="live-scoreboard">
+                        <div class="team-score-block">
+                            <div class="team-mini-logo">BLZ</div>
+                            <span class="team-code">Blaze</span>
+                        </div>
+                        <div class="score-display">94 - 91</div>
+                        <div class="team-score-block right">
+                            <div class="team-mini-logo">SKT</div>
+                            <span class="team-code">Skyline</span>
+                        </div>
+                    </div>
+
+                    <div class="live-footer">
+                        <span class="match-round-info">Q4 02:15</span>
+                        <a href="404.html" class="watch-live-btn">
+                            <span>Watch Live</span> <i class="fa-solid fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Explore by Sport Section --- */
+.explore-sports-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #020617;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.explore-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* 8-Card Grid Layout (4 columns on desktop) */
+.sports-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+.sport-card {
+    grid-column: span 3;
+    position: relative;
+    height: 340px;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+}
+
+.sport-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 25px 50px rgba(0, 240, 255, 0.2);
+}
+
+/* Dark Gradient Overlay for Readability */
+.sport-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.1) 20%, rgba(3, 7, 18, 0.92) 85%);
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+
+.sport-card:hover::before {
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.2) 10%, rgba(15, 23, 42, 0.95) 90%);
+}
+
+/* Sport Icon Badge on Card Top */
+.sport-card-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 42px;
+    height: 42px;
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00F0FF;
+    font-size: 1.1rem;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.sport-card:hover .sport-card-badge {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Card Content Details */
+.sport-card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sport-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.sport-desc {
+    font-size: 0.82rem;
+    color: #94A3B8;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sport-explore-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #00F0FF;
+    text-transform: uppercase;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+    transition: gap 0.3s ease;
+}
+
+.sport-card:hover .sport-explore-link {
+    gap: 10px;
+}
+
+/* Responsive Grid Breakpoints */
+@media (max-width: 1024px) {
+    .sport-card {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 640px) {
+    .sport-card {
+        grid-column: span 12;
+    }
+}
+</style>
+
+<!-- Explore by Sport Section HTML -->
+<section class="explore-sports-section">
+    <div class="explore-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-compass"></i> Categories
+            </span>
+            <h2 class="section-title">Explore by Sport</h2>
+            <p class="section-subtitle">Dive into your favorite discipline, browse active tournaments, and join competitive brackets tailored for your skill level.</p>
+        </div>
+
+        <!-- 8 Sports Grid -->
+        <div class="sports-grid">
+            
+            <!-- Sport 1: Football -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(17\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-futbol"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Football</h3>
+                    <p class="sport-desc">Compete in global pitch tournaments with professional refereeing and massive cups.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 2: Cricket -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(7\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-baseball-bat-ball"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Cricket</h3>
+                    <p class="sport-desc">Join T20 leagues, knockout matches, and championship series worldwide.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 3: Basketball -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(36\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-basketball"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Basketball</h3>
+                    <p class="sport-desc">Fast-paced 5v5 court matchups, seasonal ladders, and elite tournament tiers.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 4: Esports -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(50\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Esports Arena</h3>
+                    <p class="sport-desc">High-stakes competitive gaming brackets across top tactical shooters and MOBAs.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 5: Tennis -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(39\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Tennis Open</h3>
+                    <p class="sport-desc">Singles and doubles court tournaments featuring verified rankings and grand prizes.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 6: Volleyball -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(47\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-volleyball"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Volleyball</h3>
+                    <p class="sport-desc">Indoor and beach volleyball leagues designed for powerhouse teams and squads.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 7: Formula Racing -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(33\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Motorsports</h3>
+                    <p class="sport-desc">Sim-racing and track championship series with professional timing telemetry.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Sport 8: Mixed Martial Arts -->
+            <a href="404.html" class="sport-card" style="background-image: url('./1\ \(56\).webp');">
+                <div class="sport-card-badge">
+                    <i class="fa-solid fa-hand-fist"></i>
+                </div>
+                <div class="sport-card-content">
+                    <h3 class="sport-name">Combat Sports</h3>
+                    <p class="sport-desc">Structured fighting tournaments, weight-class bouts, and championship belts.</p>
+                    <span class="sport-explore-link">Explore Tournaments <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Tournament Categories Bento Grid Section --- */
+.categories-bento-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.categories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* Bento Grid Layout (12 Columns) */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+/* Base Bento Card Style */
+.bento-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 32px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+}
+
+.bento-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 25px 50px rgba(0, 240, 255, 0.2);
+}
+
+/* Asymmetric Bento Spans */
+.bento-card.span-7 { grid-column: span 7; height: 380px; }
+.bento-card.span-5 { grid-column: span 5; height: 380px; }
+.bento-card.span-4 { grid-column: span 4; height: 340px; }
+
+/* Dark Gradient Overlay */
+.bento-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.1) 15%, rgba(3, 7, 18, 0.94) 85%);
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+
+.bento-card:hover::before {
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.2) 10%, rgba(15, 23, 42, 0.96) 90%);
+}
+
+/* Floating Tag / Icon inside Bento Card */
+.bento-header-badge {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    background: rgba(3, 7, 18, 0.75);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: #00F0FF;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+}
+
+/* Bento Card Content */
+.bento-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bento-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.bento-desc {
+    font-size: 0.88rem;
+    color: #94A3B8;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 90%;
+}
+
+.bento-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #00F0FF;
+    text-transform: uppercase;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    transition: gap 0.3s ease;
+}
+
+.bento-card:hover .bento-action-link {
+    gap: 10px;
+}
+
+/* Responsive Grid Breakpoints */
+@media (max-width: 1024px) {
+    .bento-card.span-7,
+    .bento-card.span-5,
+    .bento-card.span-4 {
+        grid-column: span 12;
+        height: 320px;
+    }
+}
+</style>
+
+<!-- Tournament Categories Bento Grid Section HTML -->
+<section class="categories-bento-section">
+    <div class="categories-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-layer-group"></i> Level Divisions
+            </span>
+            <h2 class="section-title">Tournament Categories</h2>
+            <p class="section-subtitle">Whether you're playing for your campus, your workplace, or fighting for pro status, find the ideal competitive division.</p>
+        </div>
+
+        <!-- Bento Grid Layout -->
+        <div class="bento-grid">
+            
+            <!-- Category 1: Professional (Span 7) -->
+            <a href="404.html" class="bento-card span-7" style="background-image: url('./1\ \(11\).webp');">
+                <div class="bento-header-badge">
+                    <i class="fa-solid fa-medal"></i> Elite Tier
+                </div>
+                <div class="bento-content">
+                    <h3 class="bento-title">Professional Tournaments</h3>
+                    <p class="bento-desc">High-stakes championship leagues featuring verified contract rosters, official live broadcasting, and massive prize pools for top-tier organizations.</p>
+                    <span class="bento-action-link">View Pro Brackets <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Category 2: College (Span 5) -->
+            <a href="404.html" class="bento-card span-5" style="background-image: url('./1\ \(12\).webp');">
+                <div class="bento-header-badge">
+                    <i class="fa-solid fa-graduation-cap"></i> Campus Sports
+                </div>
+                <div class="bento-content">
+                    <h3 class="bento-title">College Leagues</h3>
+                    <p class="bento-desc">Inter-university cups and varsity ladders built to showcase student-athlete pride across various sports.</p>
+                    <span class="bento-action-link">Explore Campus Cups <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Category 3: Corporate (Span 4) -->
+            <a href="404.html" class="bento-card span-4" style="background-image: url('./1\ \(13\).webp');">
+                <div class="bento-header-badge">
+                    <i class="fa-solid fa-briefcase"></i> Workplace
+                </div>
+                <div class="bento-content">
+                    <h3 class="bento-title">Corporate Games</h3>
+                    <p class="bento-desc">Unite your colleagues through weekend company tournaments, networking leagues, and inter-firm cups.</p>
+                    <span class="bento-action-link">Join Corporate Events <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Category 4: School (Span 4) -->
+            <a href="404.html" class="bento-card span-4" style="background-image: url('./1\ \(14\).webp');">
+                <div class="bento-header-badge">
+                    <i class="fa-solid fa-school"></i> Youth Level
+                </div>
+                <div class="bento-content">
+                    <h3 class="bento-title">School Tournaments</h3>
+                    <p class="bento-desc">Junior championship brackets designed to foster youth sportsmanship, teamwork, and early athletic growth.</p>
+                    <span class="bento-action-link">Discover School Events <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Category 5: Amateur & Open (Span 4) -->
+            <a href="404.html" class="bento-card span-4" style="background-image: url('./1\ \(15\).webp');">
+                <div class="bento-header-badge">
+                    <i class="fa-solid fa-users"></i> Community
+                </div>
+                <div class="bento-content">
+                    <h3 class="bento-title">Amateur & Open</h3>
+                    <p class="bento-desc">Open-entry brackets for everyday players, casual teams, and grassroots talent looking to make their mark.</p>
+                    <span class="bento-action-link">Enter Open Brackets <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Interactive Knockout Bracket Section --- */
+.knockout-bracket-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #020617;
+    font-family: 'Inter', sans-serif;
+    overflow-x: auto;
+}
+
+.bracket-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* Bracket Horizontal Scroll Track for responsiveness */
+.bracket-scroll-wrapper {
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 240, 255, 0.3) rgba(15, 23, 42, 0.5);
+}
+
+.bracket-scroll-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.bracket-scroll-wrapper::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 10px;
+}
+
+.bracket-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.4);
+    border-radius: 10px;
+}
+
+/* Bracket Grid Columns */
+.bracket-tree {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    min-width: 1100px;
+    padding: 10px 0;
+}
+
+.bracket-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex: 1;
+    gap: 20px;
+}
+
+.column-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #00F0FF;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Match Node Card */
+.bracket-node {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.bracket-node:hover {
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 240, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Team Row inside Match Node */
+.bracket-team-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(3, 7, 18, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bracket-team-row:last-child {
+    border-bottom: none;
+}
+
+/* Winner styling highlight */
+.bracket-team-row.winner {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.team-info-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bracket-team-logo {
+    width: 26px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.bracket-team-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #CBD5E1;
+}
+
+.bracket-team-row.winner .bracket-team-name {
+    color: #ffffff;
+}
+
+.bracket-team-score {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #64748B;
+}
+
+.bracket-team-row.winner .bracket-team-score {
+    color: #10B981;
+}
+
+/* Final Trophy Banner Column */
+.bracket-champion-node {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 15px 35px rgba(245, 158, 11, 0.2);
+}
+
+.champion-trophy-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #030712;
+    font-size: 1.25rem;
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+}
+
+.champion-title-label {
+    font-size: 0.7rem;
+    color: #F59E0B;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.champion-team-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+}
+</style>
+
+<!-- Interactive Knockout Bracket Section HTML -->
+<section class="knockout-bracket-section">
+    <div class="bracket-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-sitemap"></i> Championship Path
+            </span>
+            <h2 class="section-title">Interactive Knockout Bracket</h2>
+            <p class="section-subtitle">Track the elimination stages from the Round of 16 down to the grand finals and ultimate champion.</p>
+        </div>
+
+        <!-- Scrollable Bracket Tree Wrapper -->
+        <div class="bracket-scroll-wrapper">
+            <div class="bracket-tree">
+                
+                <!-- Column 1: Round of 16 -->
+                <div class="bracket-column">
+                    <div class="column-title">Round of 16</div>
+                    
+                    <!-- Match 1 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">VIP</div>
+                                <span class="bracket-team-name">Vipers FC</span>
+                            </div>
+                            <span class="bracket-team-score">3</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">TSE</div>
+                                <span class="bracket-team-name">Strikers XI</span>
+                            </div>
+                            <span class="bracket-team-score">1</span>
+                        </div>
+                    </div>
+
+                    <!-- Match 2 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">NXT</div>
+                                <span class="bracket-team-name">Nexus Gaming</span>
+                            </div>
+                            <span class="bracket-team-score">2</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">PHX</div>
+                                <span class="bracket-team-name">Phoenix Clan</span>
+                            </div>
+                            <span class="bracket-team-score">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Match 3 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">BLZ</div>
+                                <span class="bracket-team-name">Blaze Titans</span>
+                            </div>
+                            <span class="bracket-team-score">4</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">SKT</div>
+                                <span class="bracket-team-name">Skyline Ballers</span>
+                            </div>
+                            <span class="bracket-team-score">2</span>
+                        </div>
+                    </div>
+
+                    <!-- Match 4 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">ACE</div>
+                                <span class="bracket-team-name">Ace Dynasty</span>
+                            </div>
+                            <span class="bracket-team-score">3</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">SRV</div>
+                                <span class="bracket-team-name">Serve Masters</span>
+                            </div>
+                            <span class="bracket-team-score">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Quarter Finals -->
+                <div class="bracket-column">
+                    <div class="column-title">Quarter-Finals</div>
+                    
+                    <!-- QF Match 1 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">VIP</div>
+                                <span class="bracket-team-name">Vipers FC</span>
+                            </div>
+                            <span class="bracket-team-score">2</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">NXT</div>
+                                <span class="bracket-team-name">Nexus Gaming</span>
+                            </div>
+                            <span class="bracket-team-score">1</span>
+                        </div>
+                    </div>
+
+                    <!-- QF Match 2 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">BLZ</div>
+                                <span class="bracket-team-name">Blaze Titans</span>
+                            </div>
+                            <span class="bracket-team-score">3</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">ACE</div>
+                                <span class="bracket-team-name">Ace Dynasty</span>
+                            </div>
+                            <span class="bracket-team-score">2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3: Semi-Finals -->
+                <div class="bracket-column">
+                    <div class="column-title">Semi-Finals</div>
+                    
+                    <!-- SF Match 1 -->
+                    <div class="bracket-node">
+                        <div class="bracket-team-row winner">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">VIP</div>
+                                <span class="bracket-team-name">Vipers FC</span>
+                            </div>
+                            <span class="bracket-team-score">2</span>
+                        </div>
+                        <div class="bracket-team-row">
+                            <div class="team-info-group">
+                                <div class="bracket-team-logo">BLZ</div>
+                                <span class="bracket-team-name">Blaze Titans</span>
+                            </div>
+                            <span class="bracket-team-score">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 4: Champion / Grand Final Winner -->
+                <div class="bracket-column">
+                    <div class="column-title">Champion</div>
+                    
+                    <div class="bracket-champion-node">
+                        <div class="champion-trophy-icon">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div>
+                            <span class="champion-title-label">Tournament Winner</span>
+                            <h3 class="champion-team-name">Vipers FC</h3>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Premium Trophy Showcase Section --- */
+.trophy-showcase-section {
+    position: relative;
+    padding: 100px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.trophy-showcase-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* 6-Image Grid Layout */
+.trophy-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+.trophy-card {
+    grid-column: span 4;
+    position: relative;
+    height: 380px;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trophy-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(245, 158, 11, 0.5);
+    box-shadow: 0 25px 50px rgba(245, 158, 11, 0.2);
+}
+
+/* Dark Gradient Overlay */
+.trophy-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.15) 15%, rgba(3, 7, 18, 0.95) 85%);
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+
+.trophy-card:hover::before {
+    background: linear-gradient(180deg, rgba(3, 7, 18, 0.25) 10%, rgba(15, 23, 42, 0.98) 90%);
+}
+
+/* Gold Trophy Badge Top-Left */
+.champion-badge-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: #030712;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    z-index: 2;
+}
+
+/* Year / Season Tag Top-Right */
+.season-tag-top {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #E2E8F0;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+}
+
+/* Card Content Details */
+.trophy-card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.championship-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.winning-team-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #F59E0B;
+    font-weight: 700;
+}
+
+.winning-team-row i {
+    font-size: 0.8rem;
+}
+
+.trophy-desc {
+    font-size: 0.82rem;
+    color: #94A3B8;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Responsive Grid Breakpoints */
+@media (max-width: 1024px) {
+    .trophy-card {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 640px) {
+    .trophy-card {
+        grid-column: span 12;
+    }
+}
+</style>
+
+<!-- Top Championship Premium Trophy Showcase Section HTML -->
+<section class="trophy-showcase-section">
+    <div class="trophy-showcase-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: #F59E0B;">
+                <i class="fa-solid fa-trophy"></i> Hall of Fame
+            </span>
+            <h2 class="section-title">Championship Trophy Showcase</h2>
+            <p class="section-subtitle">Explore historical photographs, winning rosters, and legendary squads who claimed the ultimate glory.</p>
+        </div>
+
+        <!-- 6 Trophy & Champions Cards Grid -->
+        <div class="trophy-grid">
+            
+            <!-- Trophy Card 1 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(9\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Grand Champion
+                </div>
+                <div class="season-tag-top">Season 2025</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Global Pro Cup</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Vipers FC (Undefeated Roster)
+                    </div>
+                    <p class="trophy-desc">Lifted the 24K gold-plated cup after a thrilling 3-1 victory in front of 80,000 roaring fans.</p>
+                </div>
+            </div>
+
+            <!-- Trophy Card 2 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(35\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Elite Series
+                </div>
+                <div class="season-tag-top">Season 2025</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Cyber Masters League</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Nexus Gaming Clan
+                    </div>
+                    <p class="trophy-desc">Dominated the tactical arena playoffs without dropping a single map throughout the finals bracket.</p>
+                </div>
+            </div>
+
+            <!-- Trophy Card 3 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(34\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Pro Ring
+                </div>
+                <div class="season-tag-top">Season 2024</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Basketball Pro League</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Blaze Titans
+                    </div>
+                    <p class="trophy-desc">Secured the championship ring with a historic buzzer-beater shot in game seven of the finals.</p>
+                </div>
+            </div>
+
+            <!-- Trophy Card 4 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(49\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Masters Cup
+                </div>
+                <div class="season-tag-top">Season 2024</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Tennis Grand Slam</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Ace Dynasty Doubles
+                    </div>
+                    <p class="trophy-desc">Claimed the historic silver championship plate following an intense five-set championship battle.</p>
+                </div>
+            </div>
+
+            <!-- Trophy Card 5 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(40\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Premier Shield
+                </div>
+                <div class="season-tag-top">Season 2023</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Inter-College Cup</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Oxford Varsity XI
+                    </div>
+                    <p class="trophy-desc">Outperformed 64 university squads to hoist the regional varsity championship trophy.</p>
+                </div>
+            </div>
+
+            <!-- Trophy Card 6 -->
+            <div class="trophy-card" style="background-image: url('./1\ \(57\).webp');">
+                <div class="champion-badge-top">
+                    <i class="fa-solid fa-trophy"></i> Apex Trophy
+                </div>
+                <div class="season-tag-top">Season 2023</div>
+                
+                <div class="trophy-card-content">
+                    <h3 class="championship-name">Cricket T20 World Cup</h3>
+                    <div class="winning-team-row">
+                        <i class="fa-solid fa-shield-halved"></i> Strikers XI Syndicate
+                    </div>
+                    <p class="trophy-desc">Struck gold under the stadium lights after an unforgettable final-over championship defense.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Editorial Bento & Circular Showcase Section (6 Cards) --- */
+.editorial-showcase-section {
+    position: relative;
+    padding: 110px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.editorial-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+}
+
+/* Perfectly Aligned Grid Layout */
+.editorial-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 30px;
+}
+
+/* Master Card Container */
+.editorial-card {
+    grid-column: span 4;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 28px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.editorial-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 30px 60px rgba(0, 240, 255, 0.15);
+}
+
+/* Card Header with Category & Index Number */
+.editorial-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editorial-category {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #00F0FF;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.editorial-index {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* Perfectly Aligned Circular Image Frames with Glow Effect */
+.image-circle-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-circle-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+    transition: transform 0.5s ease;
+}
+
+.editorial-card:hover .image-circle-wrapper::before {
+    transform: scale(1.2);
+}
+
+.editorial-circle-img {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+}
+
+.editorial-card:hover .editorial-circle-img {
+    transform: scale(1.08) rotate(3deg);
+    border-color: #00F0FF;
+}
+
+/* Content Panel */
+.editorial-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.editorial-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.editorial-desc {
+    font-size: 0.85rem;
+    color: #94A3B8;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Footer Action Link */
+.editorial-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 16px;
+}
+
+.editorial-link-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #00F0FF;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.3s ease;
+}
+
+.editorial-card:hover .editorial-link-text {
+    gap: 10px;
+}
+
+.editorial-icon-badge {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #CBD5E1;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.editorial-card:hover .editorial-icon-badge {
+    background: #00F0FF;
+    color: #030712;
+    border-color: #00F0FF;
+}
+
+/* Responsive Grid Breakpoints */
+@media (max-width: 1024px) {
+    .editorial-card {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 640px) {
+    .editorial-card {
+        grid-column: span 12;
+    }
+}
+</style>
+
+<!-- Editorial Bento & Circular Showcase Section HTML (6 Cards) -->
+<section class="editorial-showcase-section">
+    <div class="editorial-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-star"></i> Curated Gallery
+            </span>
+            <h2 class="section-title">Championship Highlights</h2>
+            <p class="section-subtitle">Explore perfectly aligned visual showcases featuring precise geometry, glowing circular frames, and clean typography.</p>
+        </div>
+
+        <!-- 6-Card Aligned Grid -->
+        <div class="editorial-grid">
+            
+            <!-- Card 1 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category">
+                        <i class="fa-solid fa-trophy"></i> Elite Tier
+                    </span>
+                    <span class="editorial-index">01</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (60).webp" alt="Global Pro Cup" class="editorial-circle-img">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">Global Pro Cup</h3>
+                    <p class="editorial-desc">The crown jewel of competitive tournaments featuring top-tier international rosters.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                   
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category" style="color: #F59E0B;">
+                        <i class="fa-solid fa-shield-halved"></i> Verified
+                    </span>
+                    <span class="editorial-index">02</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (50).webp" alt="Cyber Masters" class="editorial-circle-img" style="box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">Cyber Masters</h3>
+                    <p class="editorial-desc">High-stakes tactical gaming brackets with real-time spectator telemetry.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text" style="color: #F59E0B;">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                   
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category" style="color: #10B981;">
+                        <i class="fa-solid fa-medal"></i> Champions
+                    </span>
+                    <span class="editorial-index">03</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (51).webp" alt="Hall of Fame" class="editorial-circle-img" style="box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">Hall of Fame</h3>
+                    <p class="editorial-desc">Historical records, winning squad photographs, and legendary trophy lifts.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text" style="color: #10B981;">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                    
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category" style="color: #EC4899;">
+                        <i class="fa-solid fa-bolt"></i> Speed Run
+                    </span>
+                    <span class="editorial-index">04</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (52).webp" alt="Blitz Championship" class="editorial-circle-img" style="box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">Blitz Championship</h3>
+                    <p class="editorial-desc">Fast-paced knockout tournaments designed for ultimate adrenaline action.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text" style="color: #EC4899;">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                   
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category" style="color: #8B5CF6;">
+                        <i class="fa-solid fa-crown"></i> Legends
+                    </span>
+                    <span class="editorial-index">05</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (53).webp" alt="Legacy Invitational" class="editorial-circle-img" style="box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">Legacy Invitational</h3>
+                    <p class="editorial-desc">Exclusive showdowns featuring veteran captains and historic franchise rosters.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text" style="color: #8B5CF6;">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                    
+                </div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="404.html" class="editorial-card">
+                <div class="editorial-header">
+                    <span class="editorial-category" style="color: #3B82F6;">
+                        <i class="fa-solid fa-earth-americas"></i> Global
+                    </span>
+                    <span class="editorial-index">06</span>
+                </div>
+                <div class="image-circle-wrapper">
+                    <img src="./1 (54).webp" alt="World Series" class="editorial-circle-img" style="box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);">
+                </div>
+                <div class="editorial-body">
+                    <h3 class="editorial-title">World Series</h3>
+                    <p class="editorial-desc">The ultimate inter-continental showdown uniting champions across the globe.</p>
+                </div>
+                <div class="editorial-footer">
+                    <span class="editorial-link-text" style="color: #3B82F6;">Explore Series <i class="fa-solid fa-arrow-right"></i></span>
+                    
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+</section>
+<style>
+/* --- Interactive Map & Venue Explorer Section --- */
+.interactive-map-section {
+    position: relative;
+    padding: 110px 24px;
+    background: #030712;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.map-section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+}
+
+/* Split Screen Grid (Map on Left, Explanation & Image on Right) */
+.map-explorer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Left Side: Interactive Visual Map Box */
+.interactive-map-box {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%),
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* Interactive Location Pins on Map */
+.map-pin-btn {
+    position: absolute;
+    background: rgba(3, 7, 18, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    z-index: 5;
+}
+
+.map-pin-btn i {
+    color: #00F0FF;
+}
+
+.map-pin-btn:hover, 
+.map-pin-btn.active {
+    background: #00F0FF;
+    color: #030712;
+    border-color: #00F0FF;
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+}
+
+.map-pin-btn:hover i, 
+.map-pin-btn.active i {
+    color: #030712;
+}
+
+/* Pin Absolute Coordinates on the Visual Map */
+.pin-1 { top: 25%; left: 20%; }
+.pin-2 { top: 15%; left: 65%; }
+.pin-3 { top: 55%; left: 40%; }
+.pin-4 { top: 70% ; left: 75%; }
+.pin-5 { top: 40%; left: 80%; }
+.pin-6 { top: 75%; left: 25%; }
+
+/* Pulsing Radar Ring Effect */
+.interactive-map-box::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 250px;
+    border: 1px dashed rgba(0, 240, 255, 0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: radarPulse 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes radarPulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.2; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+}
+
+/* Right Side: Venue Explanation & Image Display Panel */
+.venue-details-panel {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 36px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.venue-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.venue-tag {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #00F0FF;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.venue-badge-seat {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94A3B8;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* Venue Image Banner inside Explanation Panel */
+.venue-image-banner {
+    width: 100%;
+    height: 200px;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.venue-image-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.venue-image-banner:hover img {
+    transform: scale(1.05);
+}
+
+.venue-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.venue-info-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.venue-info-desc {
+    font-size: 0.9rem;
+    color: #94A3B8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.venue-distance-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #CBD5E1;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.venue-distance-info i {
+    color: #00F0FF;
+}
+
+/* Responsive Layout Breakpoints */
+@media (max-width: 1024px) {
+    .map-explorer-grid {
+        grid-template-columns: 1fr;
+    }
+    .interactive-map-box {
+        height: 380px;
+    }
+}
+</style>
+
+<!-- Interactive Map & Venue Explorer Section HTML -->
+<section class="interactive-map-section">
+    <div class="map-section-container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-badge">
+                <i class="fa-solid fa-earth-americas"></i> Radar Locator
+            </span>
+            <h2 class="section-title">Interactive Map Explorer</h2>
+            <p class="section-subtitle">Click any location pin on the map to explore tournament venues, live capacities, distance metrics, and stadium imagery on the right.</p>
+        </div>
+
+        <!-- Split Explorer Grid -->
+        <div class="map-explorer-grid">
+            
+            <!-- Left Side: Visual Interactive Map Graphic with Location Pins -->
+            <div class="interactive-map-box">
+                <!-- Location Pin 1 -->
+                <button class="map-pin-btn pin-1 active" onclick="updateVenue(1)">
+                    <i class="fa-solid fa-location-dot"></i> Zone A
+                </button>
+                <!-- Location Pin 2 -->
+                <button class="map-pin-btn pin-2" onclick="updateVenue(2)">
+                    <i class="fa-solid fa-location-dot"></i> Sector 4
+                </button>
+                <!-- Location Pin 3 -->
+                <button class="map-pin-btn pin-3" onclick="updateVenue(3)">
+                    <i class="fa-solid fa-location-dot"></i> South Bay
+                </button>
+                <!-- Location Pin 4 -->
+                <button class="map-pin-btn pin-4" onclick="updateVenue(4)">
+                    <i class="fa-solid fa-location-dot"></i> East Wing
+                </button>
+                <!-- Location Pin 5 -->
+                <button class="map-pin-btn pin-5" onclick="updateVenue(5)">
+                    <i class="fa-solid fa-location-dot"></i> West Coast
+                </button>
+                <!-- Location Pin 6 -->
+                <button class="map-pin-btn pin-6" onclick="updateVenue(6)">
+                    <i class="fa-solid fa-location-dot"></i> Uptown
+                </button>
+            </div>
+
+            <!-- Right Side: Explanation and Image Panel -->
+            <div class="venue-details-panel" id="venueDetailsBox">
+                <div class="venue-details-header">
+                    <span class="venue-tag" id="vTag"><i class="fa-solid fa-trophy"></i> Elite Arena</span>
+                    <span class="venue-badge-seat" id="vCapacity">85,000 Capacity</span>
+                </div>
+
+                <div class="venue-image-banner">
+                    <img id="vImage" src="./1 (55).webp" alt="Grand National Stadium">
+                </div>
+
+                <div class="venue-info-content">
+                    <h3 class="venue-info-title" id="vTitle">Grand National Stadium</h3>
+                    <p class="venue-info-desc" id="vDesc">The crown jewel of competitive sports hosting international finals, multi-angle telemetry screens, and state-of-the-art player lounges.</p>
+                </div>
+
+                <div class="venue-distance-info">
+                    <i class="fa-solid fa-route"></i> <span id="vDistance">4.2 km distance from Downtown City Center</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- Simple Interactive Script to Handle Pin Clicks -->
+<script>
+const venueData = {
+    1: {
+        tag: "Elite Arena",
+        capacity: "85,000 Capacity",
+        title: "Grand National Stadium",
+        desc: "The crown jewel of competitive sports hosting international finals, multi-angle telemetry screens, and state-of-the-art player lounges.",
+        distance: "4.2 km distance from Downtown City Center",
+        image: "./im.avif"
+    },
+    2: {
+        tag: "Tactical Hub",
+        capacity: "25,000 Capacity",
+        title: "Cybernetics Esports Arena",
+        desc: "High-tech futuristic arena engineered specifically for close-quarters tactical tournaments and high-fps spectator viewing experiences.",
+        distance: "2.8 km distance from Downtown City Center",
+        image: "./im.avif"
+    },
+    3: {
+        tag: "Champions Base",
+        capacity: "50,000 Capacity",
+        title: "Imperial Sports Complex",
+        desc: "A sprawling multi-purpose tournament ground equipped with training hubs, media centers, and live broadcast production stages.",
+        distance: "6.5 km distance from Central Station",
+        image: "./im.avif"
+    },
+    4: {
+        tag: "Speed Dome",
+        capacity: "40,000 Capacity",
+        title: "Metro Indoor Dome",
+        desc: "An enclosed climate-controlled amphitheater designed for fast-paced knockout rounds and non-stop audience engagement.",
+        distance: "3.1 km distance from International Airport",
+        image: "./im.avif"
+    },
+    5: {
+        tag: "Coastal Arena",
+        capacity: "60,000 Capacity",
+        title: "Coastal Stadium",
+        desc: "Breathtaking open-air waterfront stadium offering unmatched views, sunset backdrops, and massive outdoor fan festivals.",
+        distance: "5.0 km distance from Harbor District",
+        image: "./im.avif"
+    },
+    6: {
+        tag: "Uptown Park",
+        capacity: "30,000 Capacity",
+        title: "Uptown Sports Park",
+        desc: "An intimate and vibrant community-centered venue famous for its electric atmosphere and close proximity to downtown transit hubs.",
+        distance: "1.9 km distance from Metro Interchange",
+        image: "./im.avif"
+    }
+};
+
+function updateVenue(id) {
+    // Update active state on buttons
+    document.querySelectorAll('.map-pin-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // Update right panel content
+    const data = venueData[id];
+    document.getElementById('vTag').innerHTML = `<i class="fa-solid fa-trophy"></i> ${data.tag}`;
+    document.getElementById('vCapacity').innerText = data.capacity;
+    document.getElementById('vTitle').innerText = data.title;
+    document.getElementById('vDesc').innerText = data.desc;
+    document.getElementById('vDistance').innerText = data.distance;
+    document.getElementById('vImage').src = data.image;
+}
+</script>
+<style>
+/* --- Create Your Tournament CTA Section --- */
+.create-tournament-section {
+    position: relative;
+    padding: 140px 24px;
+    background: linear-gradient(135deg, rgba(3, 7, 18, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%), 
+                url('./1\ \(19\).webp') center/cover no-repeat;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ambient Glow Orbs in Background */
+.create-tournament-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.create-tournament-container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+/* Floating 3D Trophy Graphic */
+.trophy-3d-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(0, 240, 255, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.2);
+    animation: floatTrophy 4s ease-in-out infinite;
+}
+
+.trophy-3d-wrapper i {
+    font-size: 2.5rem;
+    color: #00F0FF;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8));
+}
+
+@keyframes floatTrophy {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+/* Energetic Typography Content */
+.create-content-box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 750px;
+}
+
+.create-badge {
+    align-self: center;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: #00F0FF;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    backdrop-filter: blur(8px);
+}
+
+.create-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.15;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.create-title span {
+    background: linear-gradient(135deg, #00F0FF 0%, #3B82F6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.create-desc {
+    font-size: 1.05rem;
+    color: #94A3B8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* High-Energy Action Button (CTA) */
+.cta-button-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-create-tournament {
+    position: relative;
+    background: linear-gradient(135deg, #00F0FF 0%, #2563EB 100%);
+    color: #030712;
+    padding: 18px 44px;
+    border-radius: 40px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.btn-create-tournament::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ffffff 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-create-tournament:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0, 240, 255, 0.6);
+}
+
+.btn-create-tournament:hover::after {
+    opacity: 0.15;
+}
+
+.btn-create-tournament i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-create-tournament:hover i {
+    transform: translateX(4px);
+}
+
+.cta-subtext {
+    font-size: 0.8rem;
+    color: #64748B;
+    font-weight: 600;
+}
+</style>
+
+<!-- Create Your Tournament CTA Section HTML -->
+<section class="create-tournament-section">
+    <div class="create-tournament-container">
+        
+        <!-- Floating 3D Trophy Graphic -->
+        <div class="trophy-3d-wrapper">
+            <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <!-- Energetic Typography -->
+        <div class="create-content-box">
+            <span class="create-badge">
+                <i class="fa-solid fa-bolt"></i> Launchpad
+            </span>
+            <h2 class="create-title">Ready to Host? <span>Create Your Tournament</span> Today</h2>
+            <p class="create-desc">Set up custom brackets, manage teams, track live venues, and deploy your competitive league in minutes with our professional tournament builder.</p>
+        </div>
+
+        <!-- Press Create Tournament CTA -->
+        <div class="cta-button-wrapper">
+            <a href="404.html" class="btn-create-tournament">
+                <span>Create Tournament Now</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <span class="cta-subtext">No credit card required • Instant setup</span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* --- Professional Footer Styles --- */
+.site-footer {
+    position: relative;
+    background-color: #020617;
+    color: #94A3B8;
+    font-family: 'Inter', sans-serif;
+    padding: 80px 24px 30px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+/* Background Ambient Glow */
+.site-footer::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Top Newsletter Subscription Banner */
+.footer-newsletter-box {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 100%, rgba(30, 41, 59, 0.6) 0%);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 60px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.newsletter-info h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.newsletter-info p {
+    font-size: 0.95rem;
+    color: #94A3B8;
+    margin: 0;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+}
+
+.newsletter-input {
+    flex-grow: 1;
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px 20px;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.newsletter-input:focus {
+    border-color: #00F0FF;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.newsletter-btn {
+    background: linear-gradient(135deg, #00F0FF 0%, #0072FF 100%);
+    color: #030712;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    padding: 0 28px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.newsletter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+/* Inline Notification Toast */
+.subscription-msg {
+    position: absolute;
+    bottom: -28px;
+    left: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: none;
+}
+.subscription-msg.error { color: #FF0055; display: block; }
+.subscription-msg.success { color: #00F0FF; display: block; }
+
+/* Main Footer Grid Links */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr 1.2fr 1.5fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.footer-brand-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.footer-logo img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+
+.footer-logo span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Detailed Brand Explanation Below Logo */
+.footer-brand-desc {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: #94A3B8;
+    margin: 0;
+}
+
+/* Social Media Icons Bar */
+.footer-social-links {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    color: #00F0FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.social-icon-btn:hover {
+    background: #00F0FF;
+    color: #030712;
+    border-color: #00F0FF;
+    transform: translateY(-3px);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+/* Footer Link Columns */
+.footer-col h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-links-list a {
+    color: #94A3B8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.footer-links-list a:hover {
+    color: #00F0FF;
+    padding-left: 4px;
+}
+
+/* Headquarters Column & Map Integration */
+.footer-contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+}
+
+.footer-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #94A3B8;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-contact-item i {
+    color: #00F0FF;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+a.footer-contact-item:hover {
+    color: #00F0FF;
+}
+
+/* Google Map Container Box */
+.footer-map-container {
+    width: 100%;
+    height: 130px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.footer-map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    filter: invert(90%) hue-rotate(180deg); /* Dark-mode aesthetic for map */
+}
+
+/* Bottom Copyright Bar */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #64748B;
+}
+
+.footer-bottom-links {
+    display: flex;
+    gap: 20px;
+}
+
+.footer-bottom-links a {
+    color: #64748B;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-bottom-links a:hover {
+    color: #ffffff;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 992px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    .footer-newsletter-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 650px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
+</style>
+
+<!-- Professional Footer Section -->
+<style>
+/* --- Footer Newsletter Box Styles --- */
+.site-footer {
+    background-color: #030611;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    padding: 60px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-container {
+    max-width: 1350px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-newsletter-box {
+    position: relative;
+    background: linear-gradient(145deg, rgba(13, 19, 38, 0.95) 0%, rgba(6, 10, 25, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.newsletter-info {
+    flex: 1;
+    min-width: 0; /* Prevents text overflow */
+}
+
+.newsletter-info h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 10px;
+    line-height: 1.25;
+}
+
+.newsletter-info p {
+    color: #A0AEC0;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.newsletter-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+}
+
+.newsletter-input-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.newsletter-input {
+    flex: 1;
+    background: rgba(5, 8, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.newsletter-input::placeholder {
+    color: #718096;
+}
+
+.newsletter-input:focus {
+    border-color: #9D4EDD;
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.newsletter-btn {
+    background: linear-gradient(135deg, #9D4EDD, #7B2CBF);
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.newsletter-btn:hover {
+    background: linear-gradient(135deg, #b065ff, #8a35d9);
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
+    transform: translateY(-2px);
+}
+
+.subscription-msg {
+    font-size: 0.85rem;
+    margin-top: 4px;
+    min-height: 20px;
+}
+
+/* --- Fully Responsive Mobile Adjustments --- */
+@media (max-width: 900px) {
+    .footer-newsletter-box {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 30px 20px;
+        gap: 24px;
+    }
+
+    .newsletter-form {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-footer {
+        padding: 40px 16px;
+    }
+
+    .footer-newsletter-box {
+        padding: 24px 16px;
+        border-radius: 20px;
+    }
+
+    .newsletter-input-group {
+        flex-direction: column; /* Stack input and button on very small mobile screens */
+        gap: 10px;
+    }
+
+    .newsletter-btn {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .newsletter-input {
+        width: 100%;
+        padding: 12px 16px;
+    }
+}
+</style>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        
+        <!-- Newsletter Subscription Box -->
+        <div class="footer-newsletter-box">
+            <div class="newsletter-info">
+                <h3>Stay Ahead of the Championship</h3>
+                <p>Subscribe to receive live match schedules, ticket drops, and exclusive community updates.</p>
+            </div>
+            <form class="newsletter-form" id="newsletterForm" onsubmit="handleNewsletterSubmit(event)">
+                <div class="newsletter-input-group">
+                    <input type="email" id="subscriberEmail" class="newsletter-input" placeholder="Enter your email address..." autocomplete="email">
+                    <button type="submit" class="newsletter-btn">Subscribe</button>
+                </div>
+                <div id="subscriptionMsg" class="subscription-msg"></div>
+            </form>
+        </div>
+
+    
+
+        <!-- Main Footer Links Grid -->
+        <div class="footer-grid">
+            
+            <!-- Brand, Logo & Extended Explanation Column -->
+            <div class="footer-brand-col">
+                <a href="./index.html" class="footer-logo">
+                    <!-- Logo Image -->
+                    <img src="./logoo_26_11zon.webp" alt="Tournament Logo">
+                    <span></span>
+                </a>
+                <p class="footer-brand-desc">
+                    Stackly Tournament is the definitive international competitive sports championship.<br><br>
+                     We unite elite athletes, dedicated franchise owners, and millions of passionate fans worldwide on a singular, high-performance stage powered by state.
+                </p>
+                <!-- Fully Visible Working Social Links -->
+                <div class="footer-social-links">
+                    <a href="404.html" class="social-icon-btn" aria-label="Discord" title="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <a href="404.html" class="social-icon-btn" aria-label="X / Twitter" title="X / Twitter"><i class="fa-brands fa-pinterest"></i></a>
+                    <a href="404.html" class="social-icon-btn" aria-label="YouTube" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="404.html" class="social-icon-btn" aria-label="Instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <!-- Tournament 7 Quick Lines / Links -->
+            <div class="footer-col">
+                <h4>Tournament</h4>
+                <ul class="footer-links-list">
+                    <li><a href="./index.html">Home</a></li>
+                    <li><a href="./about.html">About Us</a></li>
+                    <li><a href="./tournaments.html">Tournaments</a></li>
+                    <li><a href="./teams.html">Teams</a></li>
+                    <li><a href="./matches.html">Matches</a></li>
+                    <li><a href="./leaderboard.html">Leaderboard Score</a></li>
+                    <li><a href="./contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Support & Legal Column -->
+            <div class="footer-col">
+                <h4>Support & Legal</h4>
+                <ul class="footer-links-list">
+                    <li><a href="404.html">Help Center</a></li>
+                    <li><a href="404.html">Privacy Policy</a></li>
+                    <li><a href="404.html">Terms of Service</a></li>
+                      <li><a href="404.html">Management Clue</a></li>
+                        <li><a href="404.html">Quick Settings</a></li>
+                          <li><a href="404.html">Leader Terms</a></li>
+                            <li><a href="404.html">Matches Roles</a></li>
+                   
+                </ul>
+            </div>
+
+            <!-- Global Headquarters Column with Embedded Map Below Phone Number -->
+            <div class="footer-col">
+                <h4>Global Headquarters</h4>
+                <div class="footer-contact-info">
+                    <!-- Location Link -->
+                    <a href="https://maps.google.com/?q=Salem,+Tamil+Nadu" target="_blank" rel="noopener noreferrer" class="footer-contact-item">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Salem, Tamil Nadu, India</span>
+                    </a>
+                    <!-- Direct Email Link -->
+                    <a href="mailto:tournament@apexarena.com" class="footer-contact-item">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>tournament@stackly.com</span>
+                    </a>
+                    <!-- Direct Telephone Link -->
+                    <a href="tel:+918971862251" class="footer-contact-item">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>+91 89718 62251</span>
+                    </a>
+                </div>
+
+                <!-- Google Map Embedded Below Phone Number -->
+                <div class="footer-map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125154.00481237936!2d78.07727025807953!3d11.653835698380456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xbabf01446e3d237b%3A0xbccf0a99602379b0!2sSalem%2C%26%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade" 
+                        title="Salem Tamil Nadu Google Map">
+                    </iframe>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Copyright & Bottom Bar -->
+        <div class="footer-bottom">
+            <p>&copy; 2026 Stackly Tournament management. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="404.html">Security</a>
+                <a href="404.html">Cookie Settings</a>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+<!-- Newsletter Validation & 404 Redirect Script -->
+<script>
+    function handleNewsletterSubmit(event) {
+        event.preventDefault();
+        const emailInput = document.getElementById('subscriberEmail');
+        const msgDiv = document.getElementById('subscriptionMsg');
+        const emailVal = emailInput.value.trim();
+
+        // Check if email field is empty
+        if (!emailVal) {
+            msgDiv.textContent = "Please fill in your email address to subscribe.";
+            msgDiv.className = "subscription-msg error";
+            emailInput.focus();
+            return;
+        }
+
+        // Basic validation check
+        if (!emailVal.includes('@') || !emailVal.includes('.')) {
+            msgDiv.textContent = "Please enter a valid email address.";
+            msgDiv.className = "subscription-msg error";
+            emailInput.focus();
+            return;
+        }
+
+        
+        setTimeout(() => {
+            window.location.href = "404.html";
+        }, 1200);
+    }
+</script>
+ <!-- JS Handling -->
+    <script>
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = mobileToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                const icon = mobileToggle.querySelector('i');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-xmark');
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stackly | Elite Sports Tournament Engine Portal</title>
+    <!-- Google Fonts: Space Grotesk & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-card: rgba(8, 8, 10, 0.92);
+            --border-cyber: rgba(52, 211, 153, 0.2);
+            --primary-neon: #34D399; /* Neon Emerald */
+            --cyan-glow: #0EA5E9; /* Electric Cyan */
+            --text-main: #ffffff;
+            --text-muted: #737373;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /* Clear HD Sports/Esports Arena Background Image */
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), 
+                        url('./b1_6_11zon.webp') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* Floating Home Navigation Button */
+        .home-floating-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            background: rgba(10, 10, 14, 0.9);
+            border: 1px solid var(--border-cyber);
+            color: var(--primary-neon);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .home-floating-btn:hover {
+            background: var(--primary-neon);
+            color: #000000;
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+        }
+
+        /* Centered Single Column Form Container */
+        .portal-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 45px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(52, 211, 153, 0.1);
+        }
+
+        .auth-view {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-view.active-view {
+            display: flex;
+        }
+
+        .form-top-brand {
+            margin-bottom: 4px;
+        }
+
+        .form-logo {
+            height: 38px;
+           
+        }
+
+        .form-title-group h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .form-title-group p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .cyber-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .cyber-input-wrapper i:not(.toggle-pass) {
+            position: absolute;
+            left: 16px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            pointer-events: none;
+        }
+
+        .cyber-input-wrapper input, 
+        .cyber-input-wrapper select {
+            width: 100%;
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 14px 16px 14px 46px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .cyber-input-wrapper select {
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .cyber-input-wrapper select option {
+            background: #08080a;
+            color: var(--text-main);
+        }
+
+        .cyber-input-wrapper input:focus, 
+        .cyber-input-wrapper select:focus {
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.15);
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 16px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.88rem;
+        }
+
+        .toggle-pass:hover {
+            color: var(--primary-neon);
+        }
+
+        .form-utilities {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.84rem;
+            margin-top: 2px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.84rem;
+        }
+
+        .remember-me input {
+            cursor: pointer;
+            accent-color: var(--primary-neon);
+            width: 15px;
+            height: 15px;
+        }
+
+        .forgot-link {
+            color: var(--cyan-glow);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+
+        .forgot-link:hover {
+            color: var(--text-main);
+        }
+
+        .error-feedback {
+            color: #FF4D4D;
+            font-size: 0.8rem;
+            font-weight: 700;
+            min-height: 16px;
+        }
+
+        .cyber-submit-btn {
+            background: var(--primary-neon);
+            color: #000000;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(52, 211, 153, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .cyber-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(52, 211, 153, 0.4);
+        }
+
+        .social-divider {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            margin: 4px 0;
+            font-weight: 700;
+        }
+
+        .social-divider::before, .social-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 25%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .social-divider::before { left: 0; }
+        .social-divider::after { right: 0; }
+
+        .social-login-icons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .social-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+        }
+
+        .switch-footer {
+            text-align: center;
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .switch-footer span {
+            color: var(--primary-neon);
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .switch-footer span:hover {
+            color: var(--cyan-glow);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Go Home Button -->
+    <a href="index.html" class="home-floating-btn">
+        <i class="fa-solid fa-house"></i> Go Home
+    </a>
+
+    <!-- Main Clean Portal Container -->
+    <div class="portal-container" id="portalContainer">
+        
+        <!-- LOGIN VIEW -->
+        <div id="loginView" class="auth-view active-view">
+            <div class="form-top-brand">
+                <a href="index.html">
+                    <img src="./logoo_26_11zon.webp" alt="Stackly Logo" class="form-logo">
+                </a>
+            </div>
+            <div class="form-title-group">
+                <h2>Commander Sign In</h2>
+                <p>Enter your credentials to access your tournament control panel</p>
+            </div>
+
+            <form id="loginForm">
+                <label>Select Role</label>
+                <div class="cyber-input-wrapper">
+                    <select id="loginRole" required>
+                        <option value="" disabled selected>Select your portal role</option>
+                        <option value="admin">Tournament Director / Admin</option>
+                        <option value="client">Team Captain / Player</option>
+                    </select>
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+
+                <label>Email Address</label>
+                <div class="cyber-input-wrapper">
+                    <input type="email" id="loginEmail" placeholder="captain@gmail.com" pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" required>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+
+                <label>Password</label>
+                <div class="cyber-input-wrapper">
+                    <input type="password" id="loginPassword" class="password-field" placeholder="Enter your password" required> 
+                    <i class="fa-solid fa-lock"></i>
+                    <i class="fa-solid fa-eye toggle-pass"></i>
+                </div>
+
+                <div class="form-utilities">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMeCheckbox" required> Remember Me
+                    </label>
+                    <a href="404.html" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <div class="error-feedback" id="loginError"></div>
+
+                <button type="submit" class="cyber-submit-btn">
+                    Log In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="social-divider">or authenticate with</div>
+            <div class="social-login-icons">
+                <a href="./404.html" class="social-btn"><i class="fa-brands fa-apple"></i></a>
+                <a href="./404.html" class="social-btn"><i class="fa-brands fa-google"></i></a>
+                <a href="./404.html" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+
+            <div class="switch-footer">
+                Need a squad account? <span onclick="toggleAuthMode()">Register Here</span>
+            </div>
+        </div>
+
+        <!-- SIGN UP VIEW -->
+        <div id="signupView" class="auth-view">
+            <div class="form-top-brand">
+                <a href="index.html">
+                    <img src="./logoo_26_11zon.webp" alt="Stackly Logo" class="form-logo">
+                </a>
+            </div>
+            <div class="form-title-group">
+                <h2>Register Squad Profile</h2>
+                <p>Create your roster credentials to enter tournament matches</p>
+            </div>
+
+            <form id="signupForm">
+                <label>Squad Captain Name</label>
+                <div class="cyber-input-wrapper">
+                    <input type="text" id="signupFirstName" placeholder="Captain Name" pattern="[A-Za-z]+" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <label>Select Role</label>
+                <div class="cyber-input-wrapper">
+                    <select id="signupRole" required>
+                        <option value="" disabled selected>Select account type</option>
+                        <option value="admin">Tournament Director / Admin</option>
+                        <option value="client">Team Captain / Player</option>
+                    </select>
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+
+                <label>Email Address</label>
+                <div class="cyber-input-wrapper">
+                    <input type="email" id="signupEmail" placeholder="captain@gmail.com" pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" required>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+
+                <label>Password</label>
+                <div class="cyber-input-wrapper">
+                    <input type="password" id="signupPassword" class="password-field" placeholder="Min 8 chars" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,}" required> 
+                    <i class="fa-solid fa-key"></i>
+                    <i class="fa-solid fa-eye toggle-pass"></i>
+                </div>
+
+                <label>Confirm Password</label>
+                <div class="cyber-input-wrapper">
+                    <input type="password" id="signupConfirmPassword" class="password-field" placeholder="Confirm password" required> 
+                    <i class="fa-solid fa-key"></i>
+                    <i class="fa-solid fa-eye toggle-pass"></i>
+                </div>
+
+                <div class="error-feedback" id="signupError"></div>
+
+                <button type="submit" class="cyber-submit-btn">
+                    Create Account <i class="fa-solid fa-user-plus"></i>
+                </button>
+            </form>
+
+            <div class="switch-footer" style="margin-top: 0.25rem;">
+                Already registered? <span onclick="toggleAuthMode()">Sign In</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Auth View Switching & Validation Script -->
+    <script>
+        let isSignup = false;
+
+        function toggleAuthMode() {
+            const loginView = document.getElementById('loginView');
+            const signupView = document.getElementById('signupView');
+            isSignup = !isSignup;
+
+            if (isSignup) {
+                loginView.classList.remove('active-view');
+                signupView.classList.add('active-view');
+            } else {
+                signupView.classList.remove('active-view');
+                loginView.classList.add('active-view');
+            }
+        }
+
+        document.querySelectorAll('.toggle-pass').forEach(toggleIcon => {
+            toggleIcon.addEventListener('click', function() {
+                const inputElement = this.parentElement.querySelector('.password-field');
+                if (inputElement.type === 'password') {
+                    inputElement.type = 'text';
+                    this.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    inputElement.type = 'password';
+                    this.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.innerText = ""; 
+            const userEmail = document.getElementById('loginEmail').value;
+            const selectedRole = document.getElementById('loginRole').value;
+            const rememberCheckbox = document.getElementById('rememberMeCheckbox');
+
+            if (!rememberCheckbox.checked) {
+                errorDiv.innerText = "Validation Error: You must check 'Remember Me' to log in.";
+                return;
+            }
+
+            if (!userEmail.endsWith('@gmail.com')) {
+                errorDiv.innerText = "Validation Error: Authentication restricted to valid @gmail.com accounts.";
+                return;
+            }
+            localStorage.setItem('currentUserEmail', userEmail);
+            window.location.href = selectedRole === 'admin' ? './admin.html' : 'client.html';
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('signupError');
+            errorDiv.innerText = ""; 
+            const firstName = document.getElementById('signupFirstName').value;
+            const userEmail = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                errorDiv.innerText = "Validation Error: Passwords do not match.";
+                return;
+            }
+
+            if (!userEmail.endsWith('@gmail.com')) {
+                errorDiv.innerText = "Access Denied: Registrations must map to verified @gmail.com accounts.";
+                return;
+            }
+            localStorage.setItem('currentUser', firstName);
+            localStorage.setItem('currentUserEmail', userEmail);
+            alert("Account successfully created! Please sign in.");
+            toggleAuthMode();
+            document.getElementById('signupForm').reset();
+        });
+    </script>
+</body>
+</html>

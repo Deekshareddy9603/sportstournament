@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Stackly — Tournament & Sports Management Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+        --electric-cyan: #00f0ff;
+        --electric-cyan-glow: rgba(0, 240, 255, 0.35);
+        --neon-lime: #39ff14;
+        --deep-obsidian: #090d16;
+        --surface-card: #111827;
+        --surface-card-alt: #1f2937;
+        --charcoal-text: #f3f4f6;
+        --muted-gray: #9ca3af;
+        --border-color: rgba(0, 240, 255, 0.18);
+        --sidebar-width: 290px;
+        --font-heading: 'Teko', sans-serif;
+        --font-body: 'Plus Jakarta Sans', sans-serif;
+        --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.4);
+        --shadow-hover: 0 20px 40px rgba(0, 240, 255, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: var(--deep-obsidian);
+        color: var(--charcoal-text);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        display: flex;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: absolute;
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.06) 0%, rgba(9, 13, 22, 0) 70%);
+        top: 5%;
+        left: 25%;
+        z-index: 1;
+        pointer-events: none;
+        animation: ambientGlow 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientGlow {
+        0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+        100% { transform: scale(1.25) translate(40px, -30px); opacity: 0.9; }
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(9, 13, 22, 0.8);
+        z-index: 99;
+        backdrop-filter: blur(4px);
+    }
+    .sidebar-overlay.mobile-open { display: block; }
+
+    .constant-sidebar {
+        width: var(--sidebar-width);
+        background: var(--surface-card);
+        border-right: 1px solid var(--border-color);
+        height: 100vh;
+        position: fixed;
+        top: 0; left: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar-brand {
+        padding: 1.5rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: #000000; /* Pitch black logo container background */
+    }
+
+    .sidebar-brand img { height: 45px; width: auto; object-fit: contain; }
+    .sidebar-brand span {
+        font-family: var(--font-heading);
+        font-size: 1.8rem;
+        color: var(--charcoal-text);
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .sidebar-menu-scroller {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+    }
+
+    .sidebar-menu-scroller::-webkit-scrollbar { width: 4px; }
+    .sidebar-menu-scroller::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .sidebar-group-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--electric-cyan);
+        margin: 1.4rem 0 0.6rem 0.8rem;
+        font-weight: 800;
+    }
+
+    .menu-section-node {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.85rem 1rem;
+        color: var(--muted-gray);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 0.35rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .menu-section-node i {
+        font-size: 0.95rem;
+        width: 20px;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .menu-section-node:hover {
+        background: rgba(0, 240, 255, 0.08);
+        color: var(--charcoal-text);
+        transform: translateX(4px);
+    }
+
+    .menu-section-node:hover i { color: var(--electric-cyan); }
+
+    .menu-section-node.active-section {
+        background: linear-gradient(135deg, var(--electric-cyan), #0099ff);
+        color: #090d16;
+        box-shadow: 0 4px 20px var(--electric-cyan-glow);
+        font-weight: 700;
+    }
+
+    .menu-section-node.active-section i { color: #090d16; }
+
+    .sidebar-footer {
+        padding: 1.2rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--surface-card);
+    }
+
+    .btn-system-kill {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--surface-card-alt);
+        border: 1px solid var(--border-color);
+        color: var(--charcoal-text);
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+    .btn-system-kill:hover {
+        background: #ef4444;
+        color: #ffffff;
+        border-color: #ef4444;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Workspace Canvas Layout */
+    .workspace-canvas {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        padding: 2.2rem;
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        width: calc(100% - var(--sidebar-width));
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Fixed Header Layout */
+    .matrix-action-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1rem 1.8rem;
+        margin-bottom: 2.2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        gap: 1.5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .left-control-cluster {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-trigger {
+        display: none;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--electric-cyan);
+        font-size: 1.2rem;
+        padding: 0.5rem 0.7rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-matrix-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: rgba(0, 240, 255, 0.08);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        color: var(--charcoal-text);
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .btn-matrix-action:hover {
+        border-color: var(--electric-cyan);
+        background: var(--electric-cyan);
+        color: #090d16;
+        box-shadow: 0 0 20px var(--electric-cyan-glow);
+    }
+
+    /* Identity Cluster */
+    .identity-profile-cluster {
+        display: flex;
+        align-items: center;
+        text-align: right;
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-end;
+    }
+
+    .identity-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .identity-meta h4 {
+        color: var(--charcoal-text);
+        font-size: 0.95rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .identity-meta p {
+        color: var(--electric-cyan);
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .content-panel {
+        display: none;
+        animation: fadeInPanel 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .content-panel.active-panel-frame { display: block; }
+
+    @keyframes fadeInPanel {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-headline {
+        font-family: var(--font-heading);
+        font-size: 3rem;
+        color: var(--charcoal-text);
+        margin-bottom: 0.2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        word-break: break-word;
+        line-height: 1;
+    }
+
+    .panel-headline span { color: var(--electric-cyan); }
+
+    .panel-description-box {
+        color: var(--muted-gray);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 850px;
+    }
+
+    .summary-quad-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .quad-card {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.8rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quad-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 4px; height: 100%;
+        background: linear-gradient(to bottom, var(--electric-cyan), var(--neon-lime));
+    }
+
+    .quad-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--electric-cyan);
+    }
+
+    .quad-card span {
+        display: block;
+        color: var(--muted-gray);
+        font-size: 0.78rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 700;
+    }
+
+    .quad-card h2 {
+        font-family: var(--font-heading);
+        font-size: 2.8rem;
+        color: var(--charcoal-text);
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .quad-card h2 span { color: var(--electric-cyan); }
+
+    .quad-sub-metric {
+        margin-top: 0.8rem;
+        font-size: 0.78rem;
+        color: var(--neon-lime);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 700;
+    }
+
+    .dashboard-asymmetric-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .dashboard-triple-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.8rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .dashboard-dual-equal {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .graph-display-card {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .graph-display-card h4, .right-module-panel h4 {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        color: var(--charcoal-text);
+        margin-bottom: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: 0.5px;
+    }
+
+    .graph-display-card h4 i, .right-module-panel h4 i { color: var(--electric-cyan); }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        min-height: 250px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .chart-wrapper.compact {
+        height: 220px;
+        min-height: 190px;
+    }
+
+    .right-module-panel {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .matrix-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.2rem;
+        font-size: 0.85rem;
+    }
+
+    .matrix-data-table th, .matrix-data-table td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        word-break: break-word;
+    }
+
+    .matrix-data-table th {
+        color: var(--electric-cyan);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.9px;
+    }
+
+    .matrix-data-table td { color: var(--charcoal-text); }
+    .matrix-data-table tr:hover td { background: rgba(0, 240, 255, 0.04); }
+
+    .status-pill {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pill.active { background: rgba(0, 240, 255, 0.12); color: var(--electric-cyan); border: 1px solid rgba(0,240,255,0.3); }
+    .status-pill.pending { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+
+    .action-console-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    .console-action-btn {
+        background: var(--surface-card-alt);
+        border: 1px solid var(--border-color);
+        color: var(--charcoal-text);
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .console-action-btn:hover {
+        background: var(--electric-cyan);
+        border-color: var(--electric-cyan);
+        color: #090d16;
+        transform: translateY(-2px);
+    }
+
+    .console-action-btn.solid-gradient {
+        background: linear-gradient(135deg, var(--electric-cyan), #0099ff);
+        color: #090d16;
+        border: 1px solid var(--electric-cyan);
+    }
+
+    .console-action-btn.solid-gradient:hover {
+        box-shadow: 0 0 20px var(--electric-cyan-glow);
+    }
+
+    .module-subtext {
+        color: var(--muted-gray);
+        font-size: 0.83rem;
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+    }
+
+    .section-action-toolbar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-toolbar-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--surface-card-alt);
+        border: 1px solid var(--border-color);
+        color: var(--charcoal-text);
+        padding: 0.65rem 1.2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+    .btn-toolbar-action:hover {
+        background: var(--electric-cyan);
+        border-color: var(--electric-cyan);
+        color: #090d16;
+        transform: translateY(-2px);
+    }
+
+    .btn-toolbar-action.cyan-solid {
+        background: linear-gradient(135deg, var(--electric-cyan), #0099ff);
+        color: #090d16;
+        border: 1px solid var(--electric-cyan);
+    }
+
+    .btn-toolbar-action.cyan-solid:hover {
+        box-shadow: 0 0 20px var(--electric-cyan-glow);
+    }
+
+    @media(max-width: 1400px) {
+        .dashboard-triple-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(max-width: 1200px) { 
+        .dashboard-asymmetric-grid, 
+        .dashboard-dual-equal,
+        .dashboard-triple-grid { 
+            grid-template-columns: minmax(0, 1fr); 
+        } 
+    }
+    @media(max-width: 992px) {
+        .constant-sidebar { transform: translateX(-100%); }
+        .constant-sidebar.mobile-open { transform: translateX(0); }
+        .workspace-canvas { 
+            margin-left: 0; 
+            padding: 1rem; 
+            width: 100%;
+            max-width: 100vw; 
+        }
+        .mobile-menu-trigger { display: inline-flex; }
+        .chart-wrapper { height: 260px; min-height: 220px; }
+        .chart-wrapper.compact { height: 200px; min-height: 170px; }
+        .panel-headline { font-size: 2.2rem; }
+        .matrix-action-header { padding: 0.8rem 1rem; gap: 0.8rem; }
+        .graph-display-card, .right-module-panel { padding: 1.2rem; }
+        .identity-meta h4 { font-size: 0.85rem; }
+        .identity-meta p { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarDrawer()"></div>
+
+       <!-- NAVIGATION SIDEBAR -->
+    <aside class="constant-sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+            <a href="index.html">
+                <img src="./logoo_26_11zon.webp" alt="Stackly Logo">
+            </a>
+            
+        </div>
+
+        <div class="sidebar-menu-scroller">
+            <nav class="sidebar-menu-list">
+                <div class="sidebar-group-label">Tournament Hub</div>
+                <div class="menu-section-node active-section" onclick="toggleActiveView('overview', this)"><i class="fa-solid fa-gauge-high"></i><span>Command Center</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('roster', this)"><i class="fa-solid fa-gamepad"></i><span>Esports & Sports</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('shifts', this)"><i class="fa-solid fa-trophy"></i><span>Leagues & Brackets</span></div>
+
+                <div class="sidebar-group-label">Match Operations</div>
+                <div class="menu-section-node" onclick="toggleActiveView('events', this)"><i class="fa-solid fa-calendar-check"></i><span>Live Schedules</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('impact', this)"><i class="fa-solid fa-chart-line"></i><span>Audience & Payouts</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('resources', this)"><i class="fa-solid fa-server"></i><span>Server & Broadcast</span></div>
+
+                <div class="sidebar-group-label">Administration</div>
+                <div class="menu-section-node" onclick="toggleActiveView('broadcast', this)"><i class="fa-solid fa-headset"></i><span>Team Support Desk</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('training', this)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Theme Customizer</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('reports', this)"><i class="fa-solid fa-file-shield"></i><span>Rules & Compliance</span></div>
+            </nav>
+        </div>
+
+         <div class="sidebar-footer">
+            <a href="index.html" onclick="flushStateStorage()" class="btn-system-kill">
+                <i class="fa-solid fa-power-off"></i><span>Log Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY LAYER -->
+    <main class="workspace-canvas">
+        <header class="matrix-action-header">
+            <div class="left-control-cluster">
+                <button class="mobile-menu-trigger" onclick="openSidebarDrawer()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="./404.html" class="btn-matrix-action"><i class="fa-solid fa-tv"></i> Live Stackly Streams  </a>
+            </div>
+            
+            <div class="identity-profile-cluster">
+                <div class="identity-meta">
+                    <h4 id="userProfileDisplayName">Tournament Director</h4>
+                    <p id="userProfileDisplayEmail">admin@stacklysports.com</p>
+                </div>
+            </div>
+        </header>
+
+         <!-- PANEL 1: COMMAND CENTER -->
+        <div id="view-overview" class="content-panel active-panel-frame">
+            <h2 class="panel-headline">Tournament <span>Command Center</span></h2>
+            <div class="panel-description-box">
+                Real-time telemetry of active sports brackets, registered pro teams, stream concurrency metrics, and prize pool distributions.
+            </div>
+
+            <div class="summary-quad-grid">
+                <div class="quad-card">
+                    <span>Active Teams</span>
+                    <h2>248</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-arrow-trend-up"></i> +32 registered today</div>
+                </div>
+                <div class="quad-card">
+                    <span>Live Matches</span>
+                    <h2>14</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-bolt"></i> Zero server packet loss</div>
+                </div>
+                <div class="quad-card">
+                    <span>Prize Pool Disbursed</span>
+                    <h2>$125K</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-check-circle"></i> 100% verified escrow</div>
+                </div>
+                <div class="quad-card">
+                    <span>Peak Viewers</span>
+                    <h2>85.4K</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-eye"></i> +42% stream surge</div>
+                </div>
+            </div>
+
+            <div class="dashboard-triple-grid">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Stream Concurrency Wave</h4>
+                    <div class="chart-wrapper compact"><canvas id="volOverviewAreaChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-pie"></i> Game Title Distribution</h4>
+                    <div class="chart-wrapper compact"><canvas id="overviewFunnelDonut"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-column"></i> Match Throughput Rate</h4>
+                    <div class="chart-wrapper compact"><canvas id="overviewBarThroughput"></canvas></div>
+                </div>
+            </div>
+
+            <div class="dashboard-asymmetric-grid">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wave-square"></i> Spectator Engagement & Ticket Sales</h4>
+                    <div class="chart-wrapper"><canvas id="overviewMainWaveChart"></canvas></div>
+                    <div class="section-action-toolbar">
+                        <a href="./404.html" class="btn-toolbar-action cyan-solid"><i class="fa-solid fa-plus"></i> Create New Bracket</a>
+                        <a href="./404.html" class="btn-toolbar-action"><i class="fa-solid fa-download"></i> Export Match Schedule</a>
+                    </div>
+                </div>
+
+                <div class="right-module-panel">
+                    <div>
+                        <h4><i class="fa-solid fa-trophy"></i> Featured Pro Matchups</h4>
+                        <p class="module-subtext">High-stakes elimination matches currently broadcasting.</p>
+                        
+                        <table class="matrix-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Match ID</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>VAL-FIN-01</td>
+                                    <td>Valorant Masters</td>
+                                    <td><span class="status-pill active">LIVE</span></td>
+                                </tr>
+                                <tr>
+                                    <td>CS2-SF-04</td>
+                                    <td>CS2 Major Cup</td>
+                                    <td><span class="status-pill active">LIVE</span></td>
+                                </tr>
+                                <tr>
+                                    <td>RL-QUART-2</td>
+                                    <td>Rocket League Pro</td>
+                                    <td><span class="status-pill pending">UPCOMING</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="action-console-grid">
+                        <a href="./404.html" class="console-action-btn solid-gradient"><i class="fa-solid fa-rotate"></i> Sync Servers</a>
+                        <a href="./404.html" class="console-action-btn"><i class="fa-solid fa-terminal"></i> API Console</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 2: ESPORTS & SPORTS -->
+        <div id="view-roster" class="content-panel">
+            <h2 class="panel-headline">Esports & Sports <span>Catalog</span></h2>
+            <div class="panel-description-box">
+                Manage registered competitive divisions, game titles, rulebooks, and participant rosters.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Active Titles</span><h2>16 Leagues</h2></div>
+                <div class="quad-card"><span>Verified Players</span><h2>1,420+</h2></div>
+                <div class="quad-card"><span>Anti-Cheat Status</span><h2>Secured</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-column"></i> Monthly Team Signups</h4>
+                    <div class="chart-wrapper"><canvas id="rosterBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-pie"></i> Category Share</h4>
+                    <div class="chart-wrapper"><canvas id="rosterPieChart"></canvas></div>
+                </div>
+            </div>
+            <div class="section-action-toolbar">
+                <a href="./404.html" class="btn-toolbar-action cyan-solid"><i class="fa-solid fa-network-wired"></i> Add Sports Category</a>
+            </div>
+        </div>
+
+        <!-- PANEL 3: LEAGUES & BRACKETS -->
+        <div id="view-shifts" class="content-panel">
+            <h2 class="panel-headline">Leagues & <span>Tournament Brackets</span></h2>
+            <div class="panel-description-box">
+                Single-elimination, double-elimination, and round-robin ladder configuration suites.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Active Brackets</span><h2>8 Ladders</h2></div>
+                <div class="quad-card"><span>Bracket Health</span><h2>100<span>%</span></h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Bracket Progression Rate</h4>
+                    <div class="chart-wrapper"><canvas id="shiftsLineChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Match Uptime Integrity</h4>
+                    <div class="chart-wrapper"><canvas id="shiftsSecondaryLine"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 4: LIVE SCHEDULES -->
+        <div id="view-events" class="content-panel">
+            <h2 class="panel-headline">Live Schedules & <span>Timelines</span></h2>
+            <div class="panel-description-box">
+                Match scheduling, referee assignments, stage allocations, and broadcast countdowns.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Queued Matches</span><h2>24 Slots</h2></div>
+                <div class="quad-card"><span>Referees Online</span><h2>18 Active</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-calendar-check"></i> Daily Match Schedule Load</h4>
+                    <div class="chart-wrapper"><canvas id="eventsBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wave-square"></i> Stage Utilization Radar</h4>
+                    <div class="chart-wrapper"><canvas id="eventsRadarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 5: AUDIENCE & PAYOUTS -->
+        <div id="view-impact" class="content-panel">
+            <h2 class="panel-headline">Audience Growth & <span>Prize Payouts</span></h2>
+            <div class="panel-description-box">
+                Sponsorship ROI metrics, streaming revenue share, and automatic winner disbursements.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Sponsorship ROI</span><h2>+310<span>%</span></h2></div>
+                <div class="quad-card"><span>Payout Speed</span><h2>&lt; 2 hrs</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Growth Metrics Radar</h4>
+                    <div class="chart-wrapper"><canvas id="impactRadarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-bar"></i> Quarterly Prize Payouts ($K)</h4>
+                    <div class="chart-wrapper"><canvas id="impactBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 6: SERVER & BROADCAST -->
+        <div id="view-resources" class="content-panel">
+            <h2 class="panel-headline">Server Infrastructure & <span>Broadcast Node</span></h2>
+            <div class="panel-description-box">
+                Dedicated game servers, low-latency CDN streaming nodes, and backup relays.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Global Nodes</span><h2>32 Servers</h2></div>
+                <div class="quad-card"><span>Network Latency</span><h2>14 ms avg</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-server"></i> Node Resource Load</h4>
+                    <div class="chart-wrapper"><canvas id="resourcesPolarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wave-square"></i> Regional Ping Telemetry</h4>
+                    <div class="chart-wrapper"><canvas id="resourcesBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 7: TEAM SUPPORT DESK -->
+        <div id="view-broadcast" class="content-panel">
+            <h2 class="panel-headline">Team Support & <span>Dispute Desk</span></h2>
+            <div class="panel-description-box">
+                Captain tickets, match dispute resolutions, and technical support queue.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Open Tickets</span><h2>6 Pending</h2></div>
+                <div class="quad-card"><span>Resolution Time</span><h2>12 mins</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-headset"></i> Support Request Channels</h4>
+                    <div class="chart-wrapper"><canvas id="broadcastBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-clock"></i> Peak Ticket Hours</h4>
+                    <div class="chart-wrapper"><canvas id="broadcastLineChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 8: THEME CUSTOMIZER -->
+        <div id="view-training" class="content-panel">
+            <h2 class="panel-headline">Sports Theme <span>Customizer</span></h2>
+            <div class="panel-description-box">
+                Configure electric cyan neon accents, obsidian depths, and typography profiles.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Electric Cyan</span><h2>#00f0ff</h2></div>
+                <div class="quad-card"><span>Obsidian Base</span><h2>#090d16</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-sliders"></i> Palette Contrast Analysis</h4>
+                    <div class="chart-wrapper"><canvas id="trainingLineChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> UI Accessibility Rating</h4>
+                    <div class="chart-wrapper"><canvas id="trainingAccuracyChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+<!-- PANEL 9: RULES & COMPLIANCE -->
+        <div id="view-reports" class="content-panel">
+            <h2 class="panel-headline">Rules & <span>Tournament Compliance</span></h2>
+            <div class="panel-description-box">
+                Fair play guidelines, anti-cheat agreements, code of conduct, and legal waivers.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Signed Waivers</span><h2>248 Teams</h2></div>
+                <div class="quad-card"><span>Compliance Rate</span><h2>100<span>%</span></h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-file-shield"></i> Compliance Tier Breakdown</h4>
+                    <div class="chart-wrapper"><canvas id="compliancePieChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-lock"></i> Secure Portal Traffic</h4>
+                    <div class="chart-wrapper"><canvas id="complianceBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+        const electricCyan = '#00f0ff';
+        const neonLime = '#39ff14';
+        const obsidianBase = '#090d16';
+        const mutedGray = '#9ca3af';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUserName = localStorage.getItem('currentUser') || "Tournament Director";
+            const currentUserEmail = localStorage.getItem('currentUserEmail') || "admin@stacklysports.com";
+
+            document.getElementById('userProfileDisplayName').innerText = currentUserName;
+            document.getElementById('userProfileDisplayEmail').innerText = currentUserEmail;
+
+            triggerAllChartEngines();
+        });
+
+        function openSidebarDrawer() {
+            document.getElementById('appSidebar').classList.add('mobile-open');
+            document.getElementById('sidebarOverlay').classList.add('mobile-open');
+        }
+
+        function closeSidebarDrawer() {
+            document.getElementById('appSidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+        }
+
+        function toggleActiveView(panelIdentity, elementInstance) {
+            document.querySelectorAll('.content-panel').forEach(view => view.classList.remove('active-panel-frame'));
+            document.querySelectorAll('.menu-section-node').forEach(node => node.classList.remove('active-section'));
+
+            document.getElementById(`view-${panelIdentity}`).classList.add('active-panel-frame');
+            elementInstance.classList.add('active-section');
+            closeSidebarDrawer();
+        }
+
+        function flushStateStorage() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUserEmail');
+        }
+
+        function triggerAllChartEngines() {
+            const standardOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            boxWidth: 12,
+                            color: mutedGray, 
+                            font: { family: 'Plus Jakarta Sans', size: 10 } 
+                        } 
+                    } 
+                },
+                scales: {
+                    x: { 
+                        grid: { color: 'rgba(0, 240, 255, 0.08)' }, 
+                        ticks: { color: mutedGray, font: { size: 9 } } 
+                    },
+                    y: { 
+                        grid: { color: 'rgba(0, 240, 255, 0.08)' }, 
+                        ticks: { color: mutedGray, font: { size: 9 } } 
+                    }
+                }
+            };
+
+            const pieOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            boxWidth: 12,
+                            color: mutedGray, 
+                            font: { family: 'Plus Jakarta Sans', size: 10 } 
+                        } 
+                    } 
+                }
+            };
+
+            new Chart(document.getElementById('volOverviewAreaChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Concurrent Viewers', data: [12000, 18500, 24000, 32000, 54000, 78000, 85400], borderColor: electricCyan, backgroundColor: 'rgba(0, 240, 255, 0.15)', tension: 0.4, fill: true }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('overviewFunnelDonut'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Valorant', 'CS2', 'Rocket League', 'Dota 2'],
+                    datasets: [{ data: [40, 30, 20, 10], backgroundColor: ['#00f0ff', '#39ff14', '#0099ff', '#9ca3af'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('overviewBarThroughput'), {
+                type: 'bar',
+                data: {
+                    labels: ['Round 1', 'Round 2', 'Quarterfinals', 'Semifinals'],
+                    datasets: [{ label: 'Matches Completed', data: [64, 32, 16, 8], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('overviewMainWaveChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        { label: 'Ticket Pass Sales', data: [300, 500, 850, 1200, 1900, 2800], borderColor: electricCyan, tension: 0.3, fill: false },
+                        { label: 'Merch Orders', data: [120, 240, 390, 520, 780, 1100], borderColor: '#39ff14', tension: 0.3, fill: false }
+                    ]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('rosterBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{ label: 'Teams Registered', data: [40, 65, 90, 130, 180, 248], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('rosterPieChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['FPS Shooters', 'MOBAs', 'Sports Sim', 'Battle Royale'],
+                    datasets: [{ data: [45, 30, 15, 10], backgroundColor: ['#00f0ff', '#39ff14', '#0099ff', '#9ca3af'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('shiftsLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Pool A', 'Pool B', 'Playoffs', 'Grand Finals', 'Showmatch'],
+                    datasets: [{ label: 'Bracket Progression (%)', data: [20, 45, 70, 90, 100], borderColor: electricCyan, backgroundColor: 'rgba(0, 240, 255, 0.15)', tension: 0.3, fill: true }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('shiftsSecondaryLine'), {
+                type: 'line',
+                data: {
+                    labels: ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4'],
+                    datasets: [{ label: 'Server Integrity Score', data: [99.8, 99.9, 100, 100], borderColor: '#39ff14', tension: 0.3, fill: false }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('eventsBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Stage Alpha', 'Stage Beta', 'Main Arena', 'Studio Stream'],
+                    datasets: [{ label: 'Matches Scheduled', data: [12, 18, 8, 14], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('eventsRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Stage Audio', 'Stream Sync', 'Referee Coverage', 'Network Ping', 'Pacing'],
+                    datasets: [{ label: 'Operations Health', data: [98, 99, 96, 95, 97], borderColor: electricCyan, backgroundColor: 'rgba(0, 240, 255, 0.2)' }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('impactRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Viewer Retention', 'Sponsor Reach', 'Prize Security', 'Stream Quality', 'Fan Engagement'],
+                    datasets: [{ label: 'Performance Metric', data: [95, 92, 99, 98, 96], borderColor: electricCyan, backgroundColor: 'rgba(0, 240, 255, 0.2)' }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('impactBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{ label: 'Payouts ($K)', data: [45, 75, 110, 125], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('resourcesPolarChart'), {
+                type: 'polarArea',
+                data: {
+                    labels: ['Game Servers', 'Relay Nodes', 'Transcoders', 'Backup Storage'],
+                    datasets: [{ data: [85, 70, 95, 60], backgroundColor: ['rgba(0, 240, 255, 0.85)', 'rgba(57, 255, 20, 0.85)', 'rgba(0, 153, 255, 0.85)', 'rgba(156, 163, 175, 0.6)'] }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('resourcesBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['US-East', 'EU-West', 'AP-East'],
+                    datasets: [{ label: 'Latency (ms)', data: [12, 18, 24], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('broadcastBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Discord Tickets', 'Direct Email', 'Live Chat', 'Captain Portal'],
+                    datasets: [{ label: 'Volume', data: [35, 18, 42, 25], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('broadcastLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['12 PM', '3 PM', '6 PM', '9 PM', '12 AM'],
+                    datasets: [{ label: 'Tickets', data: [4, 9, 18, 22, 12], borderColor: electricCyan, tension: 0.3, fill: true, backgroundColor: 'rgba(0, 240, 255, 0.15)' }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('trainingLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Theme v1', 'Theme v2', 'Theme v3', 'Theme v4'],
+                    datasets: [{ label: 'Contrast Ratio', data: [13.2, 14.1, 15.0, 16.5], borderColor: '#39ff14', tension: 0.3, fill: false }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('trainingAccuracyChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Audit 1', 'Audit 2', 'Audit 3', 'Audit 4'],
+                    datasets: [{ label: 'Accessibility Score (%)', data: [96, 98, 99, 100], borderColor: electricCyan, tension: 0.3, fill: true, backgroundColor: 'rgba(0, 240, 255, 0.15)' }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('compliancePieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pro Tier', 'Challenger', 'Open Qualifier', 'Amateur'],
+                    datasets: [{ data: [20, 30, 35, 15], backgroundColor: ['#00f0ff', '#39ff14', '#0099ff', '#9ca3af'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('complianceBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Portal 1', 'Portal 2', 'Portal 3'],
+                    datasets: [{ label: 'Active Sessions', data: [54, 38, 29], backgroundColor: electricCyan, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+        }
+    </script>
+</body>
+</html>

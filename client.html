@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Stalin — Tournament Sports Management</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+        --sports-neon: #00f0ff;
+        --sports-neon-glow: rgba(0, 255, 102, 0.35);
+        --obsidian-dark: #0a0a0a;
+        --obsidian-card: #141414;
+        --obsidian-card-alt: #1f1f1f;
+        --pure-black: #000000;
+        --text-light: #f5f5f5;
+        --text-muted: #a3a3a3;
+        --border-color: rgba(255, 255, 102, 0.15);
+        --sidebar-width: 290px;
+        --font-heading: 'Montserrat', sans-serif;
+        --font-body: 'Plus Jakarta Sans', sans-serif;
+        --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
+        --shadow-hover: 0 20px 40px rgba(0, 255, 102, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: var(--obsidian-dark);
+        color: var(--text-light);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        display: flex;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: absolute;
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(0, 255, 102, 0.06) 0%, rgba(10, 10, 10, 0) 70%);
+        top: 5%;
+        left: 25%;
+        z-index: 1;
+        pointer-events: none;
+        animation: ambientGlow 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientGlow {
+        0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+        100% { transform: scale(1.25) translate(40px, -30px); opacity: 1; }
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 99;
+        backdrop-filter: blur(4px);
+    }
+    .sidebar-overlay.mobile-open { display: block; }
+
+    .constant-sidebar {
+        width: var(--sidebar-width);
+        background: var(--obsidian-card);
+        border-right: 1px solid var(--border-color);
+        height: 100vh;
+        position: fixed;
+        top: 0; left: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar-brand {
+        padding: 1.8rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--pure-black); /* Requested Black Background */
+    }
+
+    .sidebar-brand img { height: 45px; width: auto; object-fit: contain; }
+    .sidebar-brand span {
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        color: var(--text-light);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-transform: uppercase;
+    }
+
+    .sidebar-menu-scroller {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+    }
+
+    .sidebar-menu-scroller::-webkit-scrollbar { width: 4px; }
+    .sidebar-menu-scroller::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .sidebar-group-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--sports-neon);
+        margin: 1.4rem 0 0.6rem 0.8rem;
+        font-weight: 800;
+    }
+
+    .menu-section-node {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.85rem 1rem;
+        color: var(--text-muted);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 0.35rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .menu-section-node i {
+        font-size: 0.95rem;
+        width: 20px;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .menu-section-node:hover {
+        background: rgba(0, 255, 102, 0.08);
+        color: var(--text-light);
+        transform: translateX(4px);
+    }
+
+    .menu-section-node:hover i { color: var(--sports-neon); }
+
+    .menu-section-node.active-section {
+        background: linear-gradient(135deg, var(--sports-neon), #00cc52);
+        color: var(--pure-black);
+        box-shadow: 0 4px 20px var(--sports-neon-glow);
+        font-weight: 700;
+    }
+
+    .menu-section-node.active-section i { color: var(--pure-black); }
+
+    .sidebar-footer {
+        padding: 1.2rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--pure-black);
+    }
+
+    .btn-system-kill {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--obsidian-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-light);
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+    .btn-system-kill:hover {
+        background: var(--sports-neon);
+        color: var(--pure-black);
+        border-color: var(--sports-neon);
+        box-shadow: 0 0 20px var(--sports-neon-glow);
+    }
+
+    /* Workspace Canvas Layout */
+    .workspace-canvas {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        padding: 2.2rem;
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        width: calc(100% - var(--sidebar-width));
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Fixed Header Layout */
+    .matrix-action-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--obsidian-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1rem 1.8rem;
+        margin-bottom: 2.2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        gap: 1.5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .left-control-cluster {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-trigger {
+        display: none;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--sports-neon);
+        font-size: 1.2rem;
+        padding: 0.5rem 0.7rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-matrix-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: rgba(0, 255, 102, 0.08);
+        border: 1px solid rgba(0, 255, 102, 0.25);
+        color: var(--text-light);
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .btn-matrix-action:hover {
+        border-color: var(--sports-neon);
+        background: var(--sports-neon);
+        color: var(--pure-black);
+        box-shadow: 0 0 20px var(--sports-neon-glow);
+    }
+
+    /* Identity Cluster */
+    .identity-profile-cluster {
+        display: flex;
+        align-items: center;
+        text-align: right;
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-end;
+    }
+
+    .identity-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .identity-meta h4 {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .identity-meta p {
+        color: var(--sports-neon);
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .content-panel {
+        display: none;
+        animation: fadeInPanel 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .content-panel.active-panel-frame { display: block; }
+
+    @keyframes fadeInPanel {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-headline {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        color: var(--text-light);
+        margin-bottom: 0.4rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        word-break: break-word;
+        text-transform: uppercase;
+    }
+
+    .panel-headline span { color: var(--sports-neon); }
+
+    .panel-description-box {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 850px;
+    }
+
+    .summary-quad-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .quad-card {
+        background: var(--obsidian-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.8rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quad-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 4px; height: 100%;
+        background: linear-gradient(to bottom, var(--sports-neon), #00cc52);
+    }
+
+    .quad-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--sports-neon);
+    }
+
+    .quad-card span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 700;
+    }
+
+    .quad-card h2 {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        color: var(--text-light);
+        font-weight: 800;
+    }
+
+    .quad-card h2 span { color: var(--sports-neon); }
+
+    .quad-sub-metric {
+        margin-top: 0.8rem;
+        font-size: 0.78rem;
+        color: var(--sports-neon);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 700;
+    }
+
+    .dashboard-asymmetric-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .dashboard-triple-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.8rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .dashboard-dual-equal {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .graph-display-card {
+        background: var(--obsidian-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .graph-display-card h4, .right-module-panel h4 {
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        color: var(--text-light);
+        margin-bottom: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-transform: uppercase;
+    }
+
+    .graph-display-card h4 i, .right-module-panel h4 i { color: var(--sports-neon); }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        min-height: 250px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .chart-wrapper.compact {
+        height: 220px;
+        min-height: 190px;
+    }
+
+    .right-module-panel {
+        background: var(--obsidian-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .matrix-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.2rem;
+        font-size: 0.85rem;
+    }
+
+    .matrix-data-table th, .matrix-data-table td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        word-break: break-word;
+    }
+
+    .matrix-data-table th {
+        color: var(--sports-neon);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.9px;
+    }
+
+    .matrix-data-table td { color: var(--text-light); }
+    .matrix-data-table tr:hover td { background: rgba(0, 255, 102, 0.04); }
+
+    .status-pill {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pill.active { background: rgba(0, 255, 102, 0.15); color: var(--sports-neon); border: 1px solid rgba(0,255,102,0.3); }
+    .status-pill.pending { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+
+    .action-console-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    .console-action-btn {
+        background: var(--obsidian-card-alt);
+        border: 1px solid var(--border-color);
+        color: var(--text-light);
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .console-action-btn:hover {
+        background: var(--sports-neon);
+        border-color: var(--sports-neon);
+        color: var(--pure-black);
+        transform: translateY(-2px);
+    }
+
+    .console-action-btn.solid-gradient {
+        background: linear-gradient(135deg, var(--sports-neon), #00cc52);
+        color: var(--pure-black);
+        border: 1px solid var(--sports-neon);
+    }
+
+    .console-action-btn.solid-gradient:hover {
+        box-shadow: 0 0 20px var(--sports-neon-glow);
+    }
+
+    .module-subtext {
+        color: var(--text-muted);
+        font-size: 0.83rem;
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+    }
+
+    .section-action-toolbar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-toolbar-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--obsidian-card-alt);
+        border: 1px solid var(--border-color);
+        color: var(--text-light);
+        padding: 0.65rem 1.2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+    .btn-toolbar-action:hover {
+        background: var(--sports-neon);
+        border-color: var(--sports-neon);
+        color: var(--pure-black);
+        transform: translateY(-2px);
+    }
+
+    .btn-toolbar-action.cyan-solid {
+        background: linear-gradient(135deg, var(--sports-neon), #00cc52);
+        color: var(--pure-black);
+        border: 1px solid var(--sports-neon);
+    }
+
+    .btn-toolbar-action.cyan-solid:hover {
+        box-shadow: 0 0 20px var(--sports-neon-glow);
+    }
+
+    @media(max-width: 1400px) {
+        .dashboard-triple-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(max-width: 1200px) { 
+        .dashboard-asymmetric-grid, 
+        .dashboard-dual-equal,
+        .dashboard-triple-grid { 
+            grid-template-columns: minmax(0, 1fr); 
+        } 
+    }
+    @media(max-width: 992px) {
+        .constant-sidebar { transform: translateX(-100%); }
+        .constant-sidebar.mobile-open { transform: translateX(0); }
+        .workspace-canvas { 
+            margin-left: 0; 
+            padding: 1rem; 
+            width: 100%;
+            max-width: 100vw; 
+        }
+        .mobile-menu-trigger { display: inline-flex; }
+        .chart-wrapper { height: 260px; min-height: 220px; }
+        .chart-wrapper.compact { height: 200px; min-height: 170px; }
+        .panel-headline { font-size: 1.7rem; }
+        .matrix-action-header { padding: 0.8rem 1rem; gap: 0.8rem; }
+        .graph-display-card, .right-module-panel { padding: 1.2rem; }
+        .identity-meta h4 { font-size: 0.85rem; }
+        .identity-meta p { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarDrawer()"></div>
+
+    <!-- NAVIGATION SIDEBAR -->
+    <aside class="constant-sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+            <a href="index.html">
+                <img src="./logoo_26_11zon.webp" alt="Stackly Logo">
+            </a>
+            
+        </div>
+
+        <div class="sidebar-menu-scroller">
+            <nav class="sidebar-menu-list">
+                <div class="sidebar-group-label">Tournament Hub</div>
+                <div class="menu-section-node active-section" onclick="toggleActiveView('overview', this)"><i class="fa-solid fa-chart-line"></i><span>Tournament Command Center</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('roster', this)"><i class="fa-solid fa-users"></i><span>Teams & Rosters</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('shifts', this)"><i class="fa-solid fa-calendar-days"></i><span>Live Matches & Fixtures</span></div>
+
+                <div class="sidebar-group-label">Match Management</div>
+                <div class="menu-section-node" onclick="toggleActiveView('events', this)"><i class="fa-solid fa-futbol"></i><span>Live Scoring Console</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('impact', this)"><i class="fa-solid fa-medal"></i><span>Standings & Medals</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('resources', this)"><i class="fa-solid fa-building-shield"></i><span>Venue & Equipment Hub</span></div>
+
+                <div class="sidebar-group-label">Administration</div>
+                <div class="menu-section-node" onclick="toggleActiveView('broadcast', this)"><i class="fa-solid fa-whistle"></i><span>Referee & Official Rosters</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('training', this)"><i class="fa-solid fa-sliders"></i><span>Tournament Settings</span></div>
+                <div class="menu-section-node" onclick="toggleActiveView('reports', this)"><i class="fa-solid fa-shield-halved"></i><span>Rules & Disciplinary Logs</span></div>
+            </nav>
+        </div>
+
+        <div class="sidebar-footer" style="background: #000000;">
+            <a href="index.html" onclick="flushStateStorage()" class="btn-system-kill">
+                <i class="fa-solid fa-power-off"></i><span>Log Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY LAYER -->
+    <main class="workspace-canvas">
+        <header class="matrix-action-header">
+            <div class="left-control-cluster">
+                <button class="mobile-menu-trigger" onclick="openSidebarDrawer()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="./404.html" class="btn-matrix-action"><i class="fa-solid fa-bolt"></i> Tournament Live Stream</a>
+            </div>
+            
+            <div class="identity-profile-cluster">
+                <div class="identity-meta">
+                    <h4 id="userProfileDisplayName">Tournament Director</h4>
+                    <p id="userProfileDisplayEmail">stalin.admin@sports.org</p>
+                </div>
+            </div>
+        </header>
+
+         <!-- PANEL 1: TOURNAMENT COMMAND CENTER -->
+        <div id="view-overview" class="content-panel active-panel-frame">
+            <h2 class="panel-headline">Stalin <span>Command Center</span></h2>
+            <div class="panel-description-box">
+                Real-time tracking of active sports tournament schedules, competing teams, ongoing match scores, and venue utilization metrics.
+            </div>
+
+            <div class="summary-quad-grid">
+                <div class="quad-card">
+                    <span>Active Teams</span>
+                    <h2>32 Teams</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-arrow-trend-up"></i> +4 teams this season</div>
+                </div>
+                <div class="quad-card">
+                    <span>Matches Played</span>
+                    <h2>148 Games</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-bolt"></i> 94% on schedule</div>
+                </div>
+                <div class="quad-card">
+                    <span>Tournament Progress</span>
+                    <h2>78<span>%</span></h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-check-circle"></i> Quarterfinals underway</div>
+                </div>
+                <div class="quad-card">
+                    <span>Total Attendance</span>
+                    <h2>24.5K</h2>
+                    <div class="quad-sub-metric"><i class="fa-solid fa-fire"></i> Record stadium turnouts</div>
+                </div>
+            </div>
+
+            <div class="dashboard-triple-grid">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Match Scoring Velocity</h4>
+                    <div class="chart-wrapper compact"><canvas id="volOverviewAreaChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-pie"></i> Sport Discipline Split</h4>
+                    <div class="chart-wrapper compact"><canvas id="overviewFunnelDonut"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-column"></i> Venue Utilization Rate</h4>
+                    <div class="chart-wrapper compact"><canvas id="overviewBarThroughput"></canvas></div>
+                </div>
+            </div>
+
+            <div class="dashboard-asymmetric-grid">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wave-square"></i> Spectator Engagement Trends</h4>
+                    <div class="chart-wrapper"><canvas id="overviewMainWaveChart"></canvas></div>
+                    <div class="section-action-toolbar">
+                        <a href="./404.html" class="btn-toolbar-action cyan-solid"><i class="fa-solid fa-plus"></i> Schedule New Match</a>
+                        <a href="./404.html" class="btn-toolbar-action"><i class="fa-solid fa-download"></i> Export Tournament Passbook</a>
+                    </div>
+                </div>
+
+                <div class="right-module-panel">
+                    <div>
+                        <h4><i class="fa-solid fa-table-cells"></i> Ongoing Live Matches</h4>
+                        <p class="module-subtext">Current scores across active sports arenas.</p>
+                        
+                        <table class="matrix-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Matchup</th>
+                                    <th>Sport</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Titans vs Strikers</td>
+                                    <td>Football</td>
+                                    <td><span class="status-pill active">2 - 1 (Live)</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Vipers vs Cobras</td>
+                                    <td>Basketball</td>
+                                    <td><span class="status-pill active">88 - 84 (4th Qtr)</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Spartans vs Cyclones</td>
+                                    <td>Cricket</td>
+                                    <td><span class="status-pill pending">Starts 4 PM</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="action-console-grid">
+                        <a href="./404.html" class="console-action-btn solid-gradient"><i class="fa-solid fa-rotate"></i> Sync Live Feed</a>
+                        <a href="./404.html" class="console-action-btn"><i class="fa-solid fa-headset"></i> Officials Desk</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 2: TEAMS & ROSTERS -->
+        <div id="view-roster" class="content-panel">
+            <h2 class="panel-headline">Teams & <span>Rosters</span></h2>
+            <div class="panel-description-box">
+                Manage registered franchise squads, player line-ups, certifications, and medical clearance logs.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Total Athletes</span><h2>480+</h2></div>
+                <div class="quad-card"><span>Medical Clearances</span><h2>100<span>%</span></h2></div>
+                <div class="quad-card"><span>Active Franchises</span><h2>32 Clubs</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-column"></i> Roster Registrations by Week</h4>
+                    <div class="chart-wrapper"><canvas id="rosterBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-pie"></i> Athlete Age Categories</h4>
+                    <div class="chart-wrapper"><canvas id="rosterPieChart"></canvas></div>
+                </div>
+            </div>
+            <div class="section-action-toolbar">
+                <a href="./404.html" class="btn-toolbar-action cyan-solid"><i class="fa-solid fa-user-plus"></i> Register New Franchise Team</a>
+            </div>
+        </div>
+
+        <!-- PANEL 3: LIVE MATCHES & FIXTURES -->
+        <div id="view-shifts" class="content-panel">
+            <h2 class="panel-headline">Live Matches & <span>Fixtures</span></h2>
+            <div class="panel-description-box">
+                Comprehensive tournament match calendar, knockout brackets, and timeline schedule.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Upcoming Fixtures</span><h2>24 Games</h2></div>
+                <div class="quad-card"><span>Ground Conflict Alert</span><h2>0 Issues</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-calendar-check"></i> Fixture Distribution by Sport</h4>
+                    <div class="chart-wrapper"><canvas id="shiftsLineChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Schedule Adherence Index</h4>
+                    <div class="chart-wrapper"><canvas id="shiftsSecondaryLine"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 4: LIVE SCORING CONSOLE -->
+        <div id="view-events" class="content-panel">
+            <h2 class="panel-headline">Live Scoring <span>Console</span></h2>
+            <div class="panel-description-box">
+                Real-time official score tracking, referee whistle triggers, and instant scoreboard broadcast.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Active Boards</span><h2>4 Arenas</h2></div>
+                <div class="quad-card"><span>System Uptime</span><h2>99.9<span>%</span></h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-futbol"></i> Goal / Point Frequency per Match</h4>
+                    <div class="chart-wrapper"><canvas id="eventsBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-wave-square"></i> Scoreboard Latency Metrics</h4>
+                    <div class="chart-wrapper"><canvas id="eventsRadarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 5: STANDINGS & MEDALS -->
+        <div id="view-impact" class="content-panel">
+            <h2 class="panel-headline">Tournament Standings & <span>Medal Tally</span></h2>
+            <div class="panel-description-box">
+                Leaderboards, point tables, and championship medal distributions.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Gold Trophies</span><h2>12 Awarded</h2></div>
+                <div class="quad-card"><span>Leaderboard Status</span><h2>Updated Live</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Points Spread Vector</h4>
+                    <div class="chart-wrapper"><canvas id="impactRadarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-bar"></i> Medal Count Growth</h4>
+                    <div class="chart-wrapper"><canvas id="impactBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+<!-- PANEL 6: VENUE & EQUIPMENT HUB -->
+        <div id="view-resources" class="content-panel">
+            <h2 class="panel-headline">Venue & <span>Equipment Hub</span></h2>
+            <div class="panel-description-box">
+                Manage stadium allocations, sports gear inspections, and facility maintenance logs.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Active Venues</span><h2>6 Stadiums</h2></div>
+                <div class="quad-card"><span>Equipment Check</span><h2>100% Passed</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-building-shield"></i> Venue Usage Distribution</h4>
+                    <div class="chart-wrapper"><canvas id="resourcesPolarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-server"></i> Facility Network Latency</h4>
+                    <div class="chart-wrapper"><canvas id="resourcesBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 7: REFEREE & OFFICIAL ROSTERS -->
+        <div id="view-broadcast" class="content-panel">
+            <h2 class="panel-headline">Referee & <span>Official Rosters</span></h2>
+            <div class="panel-description-box">
+                Schedule certified referees, umpires, and technical judges for tournament matches.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Active Referees</span><h2>24 Officials</h2></div>
+                <div class="quad-card"><span>Assignment Rate</span><h2>100% Assigned</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-comments"></i> Official Assignment Breakdown</h4>
+                    <div class="chart-wrapper"><canvas id="broadcastBarChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-clock"></i> Match Duty Hours</h4>
+                    <div class="chart-wrapper"><canvas id="broadcastLineChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 8: TOURNAMENT SETTINGS -->
+        <div id="view-training" class="content-panel">
+            <h2 class="panel-headline">Tournament <span>Settings</span></h2>
+            <div class="panel-description-box">
+                Configure tournament parameters, rulesets, points logic, and dark mode interface presets.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Sports Neon Primary</span><h2>#00ff66</h2></div>
+                <div class="quad-card"><span>Obsidian Base</span><h2>#0a0a0a</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-sliders"></i> System Performance</h4>
+                    <div class="chart-wrapper"><canvas id="trainingLineChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> Interface Reliability</h4>
+                    <div class="chart-wrapper"><canvas id="trainingAccuracyChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 9: RULES & DISCIPLINARY LOGS -->
+        <div id="view-reports" class="content-panel">
+            <h2 class="panel-headline">Rules & <span>Disciplinary Logs</span></h2>
+            <div class="panel-description-box">
+                Review code of conduct infractions, yellow/red cards, penalty appeals, and fair play arbitrations.
+            </div>
+            <div class="summary-quad-grid">
+                <div class="quad-card"><span>Appeals Settled</span><h2>5 Resolved</h2></div>
+                <div class="quad-card"><span>Fair Play Index</span><h2>98.4%</h2></div>
+            </div>
+            <div class="dashboard-dual-equal">
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-file-shield"></i> Infraction Breakdown</h4>
+                    <div class="chart-wrapper"><canvas id="compliancePieChart"></canvas></div>
+                </div>
+                <div class="graph-display-card">
+                    <h4><i class="fa-solid fa-lock"></i> Committee Sessions</h4>
+                    <div class="chart-wrapper"><canvas id="complianceBarChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+        const sportsNeon = '#00ff66';
+        const sportsNeonLight = '#66ff99';
+        const obsidianDark = '#0a0a0a';
+        const textMuted = '#a3a3a3';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUserName = localStorage.getItem('currentUser') || "Tournament Athele";
+            const currentUserEmail = localStorage.getItem('currentUserEmail') || "stalin.admin@sports.org";
+
+            document.getElementById('userProfileDisplayName').innerText = currentUserName;
+            document.getElementById('userProfileDisplayEmail').innerText = currentUserEmail;
+
+            triggerAllChartEngines();
+        });
+
+        function openSidebarDrawer() {
+            document.getElementById('appSidebar').classList.add('mobile-open');
+            document.getElementById('sidebarOverlay').classList.add('mobile-open');
+        }
+
+        function closeSidebarDrawer() {
+            document.getElementById('appSidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+        }
+
+        function toggleActiveView(panelIdentity, elementInstance) {
+            document.querySelectorAll('.content-panel').forEach(view => view.classList.remove('active-panel-frame'));
+            document.querySelectorAll('.menu-section-node').forEach(node => node.classList.remove('active-section'));
+
+            document.getElementById(`view-${panelIdentity}`).classList.add('active-panel-frame');
+            elementInstance.classList.add('active-section');
+            closeSidebarDrawer();
+        }
+
+        function flushStateStorage() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUserEmail');
+        }
+
+        function triggerAllChartEngines() {
+            const standardOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            boxWidth: 12,
+                            color: textMuted, 
+                            font: { family: 'Plus Jakarta Sans', size: 10 } 
+                        } 
+                    } 
+                },
+                scales: {
+                    x: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                        ticks: { color: textMuted, font: { size: 9 } } 
+                    },
+                    y: { 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                        ticks: { color: textMuted, font: { size: 9 } } 
+                    }
+                }
+            };
+
+            const pieOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            boxWidth: 12,
+                            color: textMuted, 
+                            font: { family: 'Plus Jakarta Sans', size: 10 } 
+                        } 
+                    } 
+                }
+            };
+
+            new Chart(document.getElementById('volOverviewAreaChart'), {
+                type: 'line',
+                data: {
+                    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7'],
+                    datasets: [{ label: 'Goals/Points Scored', data: [12, 28, 45, 62, 88, 110, 148], borderColor: sportsNeon, backgroundColor: 'rgba(0, 255, 102, 0.15)', tension: 0.4, fill: true }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('overviewFunnelDonut'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Football', 'Basketball', 'Cricket', 'Badminton'],
+                    datasets: [{ data: [40, 30, 20, 10], backgroundColor: ['#00ff66', '#00cc52', '#00993d', '#333333'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('overviewBarThroughput'), {
+                type: 'bar',
+                data: {
+                    labels: ['Arena A', 'Arena B', 'Arena C', 'Arena D'],
+                    datasets: [{ label: 'Hours Utilized', data: [45, 60, 50, 75], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('overviewMainWaveChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Round 1', 'Round 2', 'Round 3', 'Quarters', 'Semis', 'Finals'],
+                    datasets: [
+                        { label: 'Live Stream Viewers (k)', data: [2.5, 4.1, 7.8, 12.0, 18.5, 24.5], borderColor: sportsNeon, tension: 0.3, fill: false },
+                        { label: 'Stadium Turnout (k)', data: [1.2, 2.0, 3.5, 5.2, 8.0, 10.5], borderColor: '#a3a3a3', tension: 0.3, fill: false }
+                    ]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('rosterBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                    datasets: [{ label: 'Athlete Signups', data: [80, 120, 200, 280, 380, 480], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('rosterPieChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Under-16', 'Under-19', 'Senior Open', 'Masters'],
+                    datasets: [{ data: [30, 40, 20, 10], backgroundColor: ['#00ff66', '#00cc52', '#00993d', '#333333'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('shiftsLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Football', 'Basketball', 'Cricket', 'Tennis', 'Volleyball'],
+                    datasets: [{ label: 'Fixture Share (%)', data: [35, 25, 20, 12, 8], borderColor: sportsNeon, backgroundColor: 'rgba(0, 255, 102, 0.15)', tension: 0.3, fill: true }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('shiftsSecondaryLine'), {
+                type: 'line',
+                data: {
+                    labels: ['Stage 1', 'Stage 2', 'Stage 3', 'Stage 4'],
+                    datasets: [{ label: 'On-Time Rate (%)', data: [98, 99, 97, 100], borderColor: '#00cc52', tension: 0.3, fill: false }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('eventsBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Match 1', 'Match 2', 'Match 3', 'Match 4'],
+                    datasets: [{ label: 'Scoring Events', data: [5, 12, 8, 14], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('eventsRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Sync Speed', 'Accuracy', 'Uptime', 'Security', 'Redundancy'],
+                    datasets: [{ label: 'Console Performance', data: [100, 99, 98, 100, 99], borderColor: sportsNeon, backgroundColor: 'rgba(0, 255, 102, 0.2)' }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('impactRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Offense', 'Defense', 'Fair Play', 'Endurance', 'Teamwork'],
+                    datasets: [{ label: 'Team Index', data: [92, 88, 96, 94, 90], borderColor: sportsNeon, backgroundColor: 'rgba(0, 255, 102, 0.2)' }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('impactBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{ label: 'Medal Tally Growth', data: [3, 6, 9, 12], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('resourcesPolarChart'), {
+                type: 'polarArea',
+                data: {
+                    labels: ['Main Stadium', 'Indoor Court', 'Practice Pitch', 'Training Gym'],
+                    datasets: [{ data: [35, 25, 20, 20], backgroundColor: ['rgba(0, 255, 102, 0.85)', 'rgba(0, 204, 82, 0.85)', 'rgba(0, 153, 61, 0.85)', 'rgba(100, 100, 100, 0.6)'] }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('resourcesBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Pitch A', 'Pitch B', 'Pitch C'],
+                    datasets: [{ label: 'Network Ping (ms)', data: [12, 18, 22], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('broadcastBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Head Referees', 'Linesmen', 'Table Officials'],
+                    datasets: [{ label: 'Assigned Duty Slots', data: [24, 48, 24], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('broadcastLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['8 AM', '11 AM', '2 PM', '5 PM', '8 PM'],
+                    datasets: [{ label: 'Active Duty Hours', data: [2, 6, 8, 7, 3], borderColor: sportsNeon, tension: 0.3, fill: true, backgroundColor: 'rgba(0, 255, 102, 0.15)' }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('trainingLineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Config v1', 'Config v2', 'Config v3', 'Config v4'],
+                    datasets: [{ label: 'Contrast Ratio', data: [14.0, 14.8, 15.5, 16.2], borderColor: '#00cc52', tension: 0.3, fill: false }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('trainingAccuracyChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Audit 1', 'Audit 2', 'Audit 3', 'Audit 4'],
+                    datasets: [{ label: 'System Reliability (%)', data: [98, 99, 99.5, 100], borderColor: sportsNeon, tension: 0.3, fill: true, backgroundColor: 'rgba(0, 255, 102, 0.15)' }]
+                },
+                options: standardOptions
+            });
+
+            new Chart(document.getElementById('compliancePieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Yellow Cards', 'Technical Warnings', 'Fouls', 'Appeals Dismissed'],
+                    datasets: [{ data: [55, 25, 15, 5], backgroundColor: ['#00ff66', '#00cc52', '#00993d', '#333333'], borderWidth: 0 }]
+                },
+                options: pieOptions
+            });
+
+            new Chart(document.getElementById('complianceBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Session 1', 'Session 2', 'Session 3'],
+                    datasets: [{ label: 'Active Arbitrations', data: [2, 1, 0], backgroundColor: sportsNeon, borderRadius: 6 }]
+                },
+                options: standardOptions
+            });
+        }
+    </script>
+</body>
+</html>
